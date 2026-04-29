@@ -1,1540 +1,679 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GeriKazanım — Tüketimi Ödüllendiriyoruz</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxing-js/0.20.0/zxing.min.js"></script>
-  <style>
-    :root {
-      --bg: #0a0e0b;
-      --surface: #111714;
-      --surface2: #182019;
-      --border: #1e2b20;
-      --green: #3dff7a;
-      --green-dim: #1a7a38;
-      --green-glow: rgba(61,255,122,0.15);
-      --text: #e8f5ec;
-      --text-dim: #6b8a72;
-      --red: #ff5e5e;
-      --yellow: #ffd95e;
-      --card-radius: 18px;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GeriKazanım — Maya Okulları</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;--border:#30363d;
+  --green:#3fb950;--green-dim:#1a4a24;--green-glow:rgba(63,185,80,0.12);
+  --text:#e6edf3;--text-dim:#7d8590;--red:#f85149;--yellow:#d29922;--blue:#388bfd;
+  --radius:12px;--shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+[data-theme="light"] {
+  --bg:#f6f8fa;--surface:#ffffff;--surface2:#f0f2f5;--border:#d0d7de;
+  --green:#1a7f37;--green-dim:#d3f8d8;--green-glow:rgba(26,127,55,0.1);
+  --text:#1f2328;--text-dim:#656d76;--red:#cf222e;--yellow:#9a6700;--blue:#0969da;
+  --shadow:0 8px 32px rgba(0,0,0,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s;}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+nav{position:sticky;top:0;z-index:200;background:var(--bg);border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--green);display:flex;align-items:center;gap:8px;}
+.logo-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.nav-right{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.nav-btn{background:none;border:1px solid var(--border);color:var(--text-dim);padding:6px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;display:none;}
+.nav-btn:hover,.nav-btn.active{border-color:var(--green);color:var(--green);background:var(--green-glow);}
+.theme-toggle{background:none;border:1px solid var(--border);color:var(--text-dim);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.theme-toggle:hover{border-color:var(--green);color:var(--green);}
+.class-badge{background:var(--green-glow);border:1px solid var(--green-dim);color:var(--green);font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;display:none;align-items:center;gap:5px;}
+.class-badge.show{display:flex;}
 
-    body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+main{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+.view{display:none;}
+.view.active{display:block;}
 
-    /* GRID BACKGROUND */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(61,255,122,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(61,255,122,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
+/* LOGIN */
+.login-wrap{min-height:calc(100vh - 60px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:500px;text-align:center;box-shadow:var(--shadow);}
+.login-icon{font-size:44px;margin-bottom:14px;}
+.login-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:6px;}
+.login-sub{color:var(--text-dim);font-size:13px;margin-bottom:28px;line-height:1.6;}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:20px;}
+.class-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:12px 6px;border-radius:10px;cursor:pointer;transition:all 0.2s;}
+.class-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-glow);}
+.login-or{color:var(--text-dim);font-size:13px;margin:16px 0;position:relative;}
+.login-or::before,.login-or::after{content:'';position:absolute;top:50%;width:44%;height:1px;background:var(--border);}
+.login-or::before{left:0;}.login-or::after{right:0;}
+.qr-login-btn{width:100%;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:13px;border-radius:10px;border:none;cursor:pointer;transition:all 0.25s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.qr-login-btn:hover{opacity:0.88;transform:translateY(-1px);}
 
-    /* GLOW ORBS */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .orb1 { width: 400px; height: 400px; background: rgba(61,255,122,0.08); top: -100px; right: -100px; }
-    .orb2 { width: 300px; height: 300px; background: rgba(61,255,122,0.05); bottom: 100px; left: -80px; }
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);}
+.card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:4px;}
+.card-sub{color:var(--text-dim);font-size:13px;margin-bottom:18px;}
 
-    /* NAVIGATION */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,11,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+/* SCANNER */
+.scanner-layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start;}
+@media(max-width:768px){.scanner-layout{grid-template-columns:1fr;}}
 
-    .logo {
-      font-family: 'Unbounded', sans-serif;
-      font-weight: 900;
-      font-size: 18px;
-      color: var(--green);
-      letter-spacing: -0.5px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--green);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--bg);
-      font-size: 16px;
-    }
+.input-label{display:block;font-size:11px;font-weight:600;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.barcode-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px;padding:11px 14px;border-radius:8px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;font-family:'DM Sans',sans-serif;}
+.barcode-input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow);}
+.barcode-input::placeholder{color:var(--text-dim);}
+.input-group{margin-bottom:14px;}
 
-    .nav-links {
-      display: flex;
-      gap: 8px;
-    }
-    .nav-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .nav-btn:hover, .nav-btn.active {
-      border-color: var(--green);
-      color: var(--green);
-      background: var(--green-glow);
-    }
+.cam-btn{width:100%;background:var(--surface2);border:1px dashed var(--border);color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px;border-radius:8px;cursor:pointer;margin-bottom:14px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.cam-btn:hover{border-color:var(--green);color:var(--green);background:var(--green-glow);}
 
-    /* MAIN LAYOUT */
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 40px 24px 80px;
-    }
+.custom-select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px 14px;border-radius:8px;outline:none;cursor:pointer;transition:border-color 0.2s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237d8590' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.custom-select:focus{border-color:var(--green);}
 
-    /* VIEWS */
-    .view { display: none; }
-    .view.active { display: block; }
+.product-preview{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:14px;display:none;align-items:center;gap:12px;}
+.product-preview.show{display:flex;}
+.product-icon-big{font-size:26px;}
+.product-name-big{font-size:14px;font-weight:600;}
+.product-cat{font-size:11px;color:var(--text-dim);}
+.product-pts-big{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green);margin-left:auto;white-space:nowrap;}
 
-    /* ===== LANDING ===== */
-    .hero {
-      text-align: center;
-      padding: 60px 0 80px;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--green-glow);
-      border: 1px solid var(--green-dim);
-      color: var(--green);
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 6px 14px;
-      border-radius: 99px;
-      margin-bottom: 32px;
-    }
-    .hero-badge::before { content: '●'; font-size: 8px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.warn-box{background:rgba(248,81,73,0.08);border:1px solid var(--red);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:12px;display:none;}
+.warn-box.show{display:block;}
 
-    .hero h1 {
-      font-family: 'Unbounded', sans-serif;
-      font-size: clamp(36px, 6vw, 72px);
-      font-weight: 900;
-      line-height: 1.05;
-      letter-spacing: -2px;
-      margin-bottom: 24px;
-    }
-    .hero h1 span { color: var(--green); }
+.submit-btn{width:100%;background:var(--green);color:#fff;border:none;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:13px;border-radius:10px;cursor:pointer;transition:all 0.25s;}
+.submit-btn:hover:not(:disabled){opacity:0.88;transform:translateY(-1px);}
+.submit-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none;}
 
-    .hero p {
-      max-width: 520px;
-      margin: 0 auto 40px;
-      color: var(--text-dim);
-      font-size: 17px;
-      line-height: 1.7;
-    }
+.sidebar-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;}
+.balance-big{text-align:center;padding:14px 0;}
+.balance-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:var(--green);line-height:1;}
+.balance-label{font-size:12px;color:var(--text-dim);margin-top:4px;}
+.balance-added{display:inline-block;background:var(--green-glow);border:1px solid var(--green-dim);color:var(--green);font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;margin-top:8px;opacity:0;transition:opacity 0.3s;}
+.balance-added.show{opacity:1;}
 
-    .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--green);
-      color: var(--bg);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 14px 28px;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.25s;
-      box-shadow: 0 0 30px rgba(61,255,122,0.3);
-    }
-    .hero-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 50px rgba(61,255,122,0.5);
-    }
+.tx-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.tx-item:last-child{border-bottom:none;}
+.tx-icon{width:34px;height:34px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.tx-info{flex:1;}
+.tx-name{font-size:13px;font-weight:600;}
+.tx-sub{font-size:11px;color:var(--text-dim);margin-top:1px;}
+.tx-pts{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green);}
 
-    /* STATS ROW */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin: 60px 0;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 28px;
-      text-align: center;
-      transition: border-color 0.2s;
-    }
-    .stat-card:hover { border-color: var(--green-dim); }
-    .stat-num {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 36px;
-      font-weight: 900;
-      color: var(--green);
-      line-height: 1;
-    }
-    .stat-label { color: var(--text-dim); font-size: 13px; margin-top: 8px; }
+.prod-table{width:100%;border-collapse:collapse;font-size:13px;}
+.prod-table th{text-align:left;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);}
+.prod-table td{padding:9px 0;border-bottom:1px solid var(--border);}
+.prod-table tr:last-child td{border-bottom:none;}
 
-    /* HOW IT WORKS */
-    .section-title {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: -0.5px;
-    }
-    .section-sub { color: var(--text-dim); font-size: 14px; margin-bottom: 32px; }
+/* LEADERBOARD */
+.lb-header{background:linear-gradient(135deg,var(--green-dim),var(--surface2));border:1px solid var(--border);border-radius:var(--radius);padding:26px;margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.lb-trophy{font-size:44px;}
+.lb-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.lb-sub{color:var(--text-dim);font-size:13px;margin-top:3px;}
+.lb-grid{display:grid;gap:8px;}
+.lb-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;transition:all 0.2s;}
+.lb-row:hover{border-color:var(--green);transform:translateX(3px);}
+.lb-row.rank-1{border-color:#ffd700;background:linear-gradient(90deg,rgba(255,215,0,0.06),var(--surface));}
+.lb-row.rank-2{border-color:#c0c0c0;background:linear-gradient(90deg,rgba(192,192,192,0.06),var(--surface));}
+.lb-row.rank-3{border-color:#cd7f32;background:linear-gradient(90deg,rgba(205,127,50,0.06),var(--surface));}
+.lb-rank{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;width:30px;text-align:center;}
+.rank-1 .lb-rank{color:#ffd700;}.rank-2 .lb-rank{color:#c0c0c0;}.rank-3 .lb-rank{color:#cd7f32;}
+.lb-class-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;flex:1;}
+.lb-count{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.lb-pts{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);white-space:nowrap;}
+.lb-pts span{font-size:11px;font-weight:400;color:var(--text-dim);}
+.lb-bar-wrap{width:100%;background:var(--surface2);border-radius:99px;height:3px;margin-top:5px;}
+.lb-bar{height:3px;background:var(--green);border-radius:99px;transition:width 1s ease;}
 
-    .steps-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-    }
-    .step-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 28px 24px;
-      position: relative;
-      overflow: hidden;
-    }
-    .step-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--green), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .step-card:hover::after { opacity: 1; }
-    .step-num {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 11px;
-      color: var(--green);
-      letter-spacing: 2px;
-      margin-bottom: 16px;
-    }
-    .step-icon { font-size: 28px; margin-bottom: 12px; }
-    .step-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
-    .step-card p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+/* QR */
+.qr-intro{text-align:center;padding:10px 0 28px;}
+.qr-intro h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px;}
+.qr-intro p{color:var(--text-dim);font-size:13px;line-height:1.7;}
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;}
+.qr-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;}
+.qr-card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;margin-bottom:10px;}
+.qr-code-wrap{display:flex;justify-content:center;margin-bottom:10px;}
+.qr-dl{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;width:100%;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.qr-dl:hover{border-color:var(--green);color:var(--green);}
 
-    /* CATEGORIES */
-    .categories-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-      margin-top: 32px;
-    }
-    .cat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s;
-    }
-    .cat-card:hover {
-      border-color: var(--green);
-      background: var(--surface2);
-      transform: translateY(-3px);
-    }
-    .cat-icon { font-size: 32px; margin-bottom: 10px; }
-    .cat-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .cat-rate {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--green);
-    }
-    .cat-rate-label { font-size: 11px; color: var(--text-dim); }
+/* PROFILE */
+.profile-header{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:18px;display:flex;align-items:center;gap:14px;}
+.profile-avatar{width:60px;height:60px;background:var(--green);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;text-align:center;line-height:1.2;}
+.profile-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+.profile-email{color:var(--text-dim);font-size:13px;margin-top:2px;}
+.profile-badge-label{margin-left:auto;background:var(--green-glow);border:1px solid var(--green-dim);color:var(--green);font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;}
+.stat-num{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--green);}
+.stat-label{font-size:12px;color:var(--text-dim);margin-top:3px;}
+.history-table{width:100%;border-collapse:collapse;}
+.history-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);padding:9px 0;border-bottom:1px solid var(--border);}
+.history-table td{padding:11px 0;font-size:13px;border-bottom:1px solid var(--border);}
+.history-table tr:last-child td{border-bottom:none;}
+.td-green{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--green);}
+.td-code{font-family:monospace;font-size:12px;color:var(--text-dim);}
 
-    /* ===== BARCODE SCANNER ===== */
-    .scanner-layout {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 24px;
-      align-items: start;
-    }
+/* CAMERA */
+.cam-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.cam-overlay.open{display:flex;}
+.cam-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:22px;width:100%;max-width:400px;text-align:center;}
+.cam-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:4px;}
+.cam-sub{color:var(--text-dim);font-size:13px;margin-bottom:14px;}
+.cam-frame{position:relative;margin-bottom:12px;border-radius:12px;overflow:hidden;}
+#camVideo{width:100%;display:block;background:#000;aspect-ratio:4/3;object-fit:cover;}
+.cam-scanline{position:absolute;left:0;right:0;height:2px;background:var(--green);box-shadow:0 0 8px var(--green);animation:camAnim 2s ease-in-out infinite;}
+@keyframes camAnim{0%{top:10%}50%{top:85%}100%{top:10%}}
+.cam-status{font-size:13px;color:var(--text-dim);margin-bottom:12px;min-height:18px;}
+.cam-status.ok{color:var(--green);font-weight:600;}.cam-status.err{color:var(--red);}
+.cam-close-btn{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:14px;padding:11px;border-radius:8px;cursor:pointer;transition:all 0.2s;}
+.cam-close-btn:hover{border-color:var(--red);color:var(--red);}
 
-    .scan-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 32px;
-    }
+/* TOAST */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--surface);border:1px solid var(--green);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:11px;min-width:240px;z-index:999;transform:translateY(80px);opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);box-shadow:var(--shadow);}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-icon{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0;}
+.toast-title{font-size:13px;font-weight:700;}.toast-sub{font-size:12px;color:var(--text-dim);margin-top:1px;}
 
-    .scan-header {
-      margin-bottom: 28px;
-    }
-    .scan-header h2 {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .scan-header p { color: var(--text-dim); font-size: 13px; }
+.empty{text-align:center;padding:28px 0;color:var(--text-dim);font-size:13px;}
+.view-heading{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;}
+.view-subheading{color:var(--text-dim);font-size:13px;margin-bottom:20px;}
 
-    /* Barcode visual */
-    .barcode-visual {
-      background: white;
-      border-radius: 12px;
-      padding: 20px 16px 12px;
-      margin-bottom: 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .barcode-lines {
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 2px;
-      height: 64px;
-      margin-bottom: 8px;
-    }
-    .barcode-lines div {
-      background: #111;
-      border-radius: 1px;
-    }
-    .scan-line {
-      position: absolute;
-      left: 0; right: 0;
-      height: 2px;
-      background: rgba(255, 0, 0, 0.7);
-      top: 20px;
-      animation: scanAnim 2s ease-in-out infinite;
-    }
-    @keyframes scanAnim {
-      0%   { top: 20px; }
-      50%  { top: calc(100% - 30px); }
-      100% { top: 20px; }
-    }
-    .barcode-num-display {
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      color: #333;
-      letter-spacing: 3px;
-    }
+footer{border-top:1px solid var(--border);background:var(--bg);padding:18px;text-align:center;font-size:12px;color:var(--text-dim);line-height:1.8;}
+footer strong{color:var(--text);}
 
-    /* INPUT */
-    .input-group { margin-bottom: 20px; }
-    .input-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dim);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .barcode-input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      letter-spacing: 4px;
-      padding: 14px 18px;
-      border-radius: 10px;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .barcode-input:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px var(--green-glow);
-    }
-    .barcode-input::placeholder { letter-spacing: 2px; color: var(--text-dim); }
-
-    .select-group { margin-bottom: 20px; }
-    .custom-select {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
-      padding: 14px 18px;
-      border-radius: 10px;
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b8a72' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-    }
-    .custom-select:focus { border-color: var(--green); }
-
-    .price-input-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    /* RESULT PREVIEW */
-    .result-preview {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .result-preview-label { font-size: 12px; color: var(--text-dim); }
-    .result-preview-amount {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--green);
-    }
-    .result-preview-amount span { font-size: 14px; }
-
-    .submit-btn {
-      width: 100%;
-      background: var(--green);
-      color: var(--bg);
-      border: none;
-      font-family: 'Unbounded', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.25s;
-      letter-spacing: 0.5px;
-    }
-    .submit-btn:hover {
-      box-shadow: 0 0 30px rgba(61,255,122,0.4);
-      transform: translateY(-1px);
-    }
-    .submit-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* SIDEBAR */
-    .sidebar-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 24px;
-      margin-bottom: 16px;
-    }
-    .sidebar-title {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 16px;
-    }
-
-    /* Balance widget */
-    .balance-display {
-      text-align: center;
-      padding: 20px 0;
-    }
-    .balance-label { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
-    .balance-amount {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 42px;
-      font-weight: 900;
-      color: var(--green);
-      line-height: 1;
-      text-shadow: 0 0 30px rgba(61,255,122,0.4);
-    }
-    .balance-currency { font-size: 20px; }
-    .balance-change {
-      font-size: 12px;
-      color: var(--green);
-      margin-top: 8px;
-      background: var(--green-glow);
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 99px;
-    }
-
-    /* Transaction list */
-    .tx-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .tx-item:last-child { border-bottom: none; }
-    .tx-icon {
-      width: 36px; height: 36px;
-      background: var(--surface2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-    .tx-info { flex: 1; }
-    .tx-name { font-size: 13px; font-weight: 600; }
-    .tx-date { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-    .tx-amount {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--green);
-    }
-
-    /* Rate table */
-    .rate-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-    .rate-row:last-child { border-bottom: none; }
-    .rate-cat { display: flex; align-items: center; gap: 8px; }
-    .rate-pct {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 12px;
-      color: var(--green);
-      background: var(--green-glow);
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
-    /* ===== SUCCESS TOAST ===== */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--surface);
-      border: 1px solid var(--green);
-      border-radius: 14px;
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 280px;
-      z-index: 999;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 0 40px rgba(61,255,122,0.2);
-    }
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    .toast-icon {
-      width: 40px; height: 40px;
-      background: var(--green);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      color: var(--bg);
-      flex-shrink: 0;
-    }
-    .toast-title { font-size: 14px; font-weight: 700; }
-    .toast-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-
-    /* ===== PROFILE ===== */
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 28px;
-      margin-bottom: 24px;
-    }
-    .avatar {
-      width: 72px; height: 72px;
-      background: linear-gradient(135deg, var(--green-dim), var(--green));
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-    }
-    .profile-info h2 {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-    }
-    .profile-info p { color: var(--text-dim); font-size: 13px; margin-top: 4px; }
-    .profile-badge {
-      margin-left: auto;
-      background: var(--green-glow);
-      border: 1px solid var(--green-dim);
-      color: var(--green);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
-    }
-
-    .profile-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .history-table th {
-      text-align: left;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .history-table td {
-      padding: 14px 0;
-      font-size: 13px;
-      border-bottom: 1px solid var(--border);
-    }
-    .history-table tr:last-child td { border-bottom: none; }
-    .td-green {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 12px;
-      color: var(--green);
-    }
-    .td-code {
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-
-    /* WITHDRAW */
-    .withdraw-section {
-      grid-column: 1 / -1;
-    }
-    .withdraw-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      padding: 28px;
-    }
-    .withdraw-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: end;
-    }
-    .withdraw-btn {
-      background: var(--surface2);
-      border: 1px solid var(--green-dim);
-      color: var(--green);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 14px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .withdraw-btn:hover { background: var(--green-glow); }
-
-    /* CAMERA SCANNER MODAL */
-    .cam-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.92);
-      z-index: 500;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      display: none;
-    }
-    .cam-overlay.open { display: flex; }
-    .cam-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-    .cam-title {
-      font-family: 'Unbounded', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-    .cam-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
-    #camVideo {
-      width: 100%;
-      border-radius: 12px;
-      background: #000;
-      aspect-ratio: 4/3;
-      object-fit: cover;
-      display: block;
-    }
-    .cam-frame {
-      position: relative;
-      margin-bottom: 16px;
-    }
-    .cam-corners {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-    .cam-corners::before, .cam-corners::after {
-      content: '';
-      position: absolute;
-      width: 40px; height: 40px;
-      border-color: var(--green);
-      border-style: solid;
-      border-width: 0;
-    }
-    .cam-corners::before {
-      top: 8px; left: 8px;
-      border-top-width: 3px;
-      border-left-width: 3px;
-      border-radius: 4px 0 0 0;
-    }
-    .cam-corners::after {
-      bottom: 8px; right: 8px;
-      border-bottom-width: 3px;
-      border-right-width: 3px;
-      border-radius: 0 0 4px 0;
-    }
-    .cam-scan-line {
-      position: absolute;
-      left: 10%; right: 10%;
-      height: 2px;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-      animation: camScan 2s ease-in-out infinite;
-      top: 20%;
-    }
-    @keyframes camScan {
-      0%   { top: 15%; }
-      50%  { top: 80%; }
-      100% { top: 15%; }
-    }
-    .cam-status {
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 16px;
-      min-height: 20px;
-    }
-    .cam-status.success { color: var(--green); font-weight: 600; }
-    .cam-status.error   { color: var(--red); }
-    .cam-close {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text-dim);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
-      padding: 12px 24px;
-      border-radius: 10px;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.2s;
-    }
-    .cam-close:hover { border-color: var(--red); color: var(--red); }
-
-    /* SCAN BUTTON */
-    .scan-cam-btn {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px dashed var(--green-dim);
-      color: var(--green);
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 13px;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-bottom: 16px;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .scan-cam-btn:hover {
-      background: var(--green-glow);
-      border-color: var(--green);
-    }
-    @media (max-width: 768px) {
-      .scanner-layout { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: 1fr; }
-      .profile-grid { grid-template-columns: 1fr; }
-      .price-input-group { grid-template-columns: 1fr; }
-      nav { padding: 0 16px; }
-      .logo-text { display: none; }
-    }
-  </style>
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr;}.qr-grid{grid-template-columns:repeat(2,1fr);}.profile-header{flex-wrap:wrap;}.profile-badge-label{margin-left:0;}}
+</style>
 </head>
 <body>
 
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-
 <!-- TOAST -->
 <div class="toast" id="toast">
-  <div class="toast-icon">✓</div>
-  <div>
-    <div class="toast-title" id="toastTitle">Para eklendi!</div>
-    <div class="toast-sub" id="toastSub">Hesabınız güncellendi</div>
+  <div class="toast-icon" id="toastIcon">✓</div>
+  <div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div>
+</div>
+
+<!-- CAMERA MODAL -->
+<div class="cam-overlay" id="camOverlay">
+  <div class="cam-box">
+    <div class="cam-title" id="camTitle">📷 Barkod Tara</div>
+    <div class="cam-sub" id="camSubtitle">Ürünün barkodunu kameraya göster</div>
+    <div class="cam-frame"><video id="camVideo" playsinline autoplay muted></video><div class="cam-scanline"></div></div>
+    <div class="cam-status" id="camStatus">Kamera başlatılıyor...</div>
+    <button class="cam-close-btn" onclick="closeCamera()">✕ Kapat</button>
   </div>
 </div>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">
-    <div class="logo-icon">♻</div>
-    <span class="logo-text" style="font-family:'Unbounded',sans-serif;">GeriKazanım</span>
-  </div>
-  <div class="nav-links">
-    <button class="nav-btn active" onclick="showView('landing')">Ana Sayfa</button>
-    <button class="nav-btn" onclick="showView('scanner')">Barkod Gir</button>
-    <button class="nav-btn" onclick="showView('profile')">Profilim</button>
+  <div class="logo"><div class="logo-dot"></div>GeriKazanım</div>
+  <div class="nav-right">
+    <div class="class-badge" id="classBadge">📚 <span id="classBadgeText"></span></div>
+    <button class="nav-btn" id="navScan" onclick="showView('scanner')">Barkod Gir</button>
+    <button class="nav-btn" id="navLb" onclick="showView('leaderboard')">Sıralama</button>
+    <button class="nav-btn" id="navQr" onclick="showView('qrcodes')">QR Kodlar</button>
+    <button class="nav-btn" id="navProfile" onclick="showView('profile')">Profilim</button>
+    <button class="nav-btn" id="navLogout" onclick="logout()">Çıkış</button>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
   </div>
 </nav>
 
-<main>
-
-  <!-- ===== LANDING VIEW ===== -->
-  <div class="view active" id="view-landing">
-
-    <div class="hero">
-      <div class="hero-badge">Aktif Platform</div>
-      <h1>Tüketirken<br><span>Kazan</span></h1>
-      <p>Satın aldığın ürünlerin barkodunu gir, ürün türüne göre hesabına para yükle. Sosyal bilinçli tüketimi ödüllendiriyoruz.</p>
-      <button class="hero-cta" onclick="showView('scanner')">
-        ▦ Barkod Gir &amp; Kazan
-      </button>
+<!-- LOGIN -->
+<div class="view active" id="view-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-icon">♻️</div>
+      <div class="login-title">GeriKazanım</div>
+      <div class="login-sub">Maya Okulları Geri Dönüşüm Puan Sistemi<br>Sınıfını seç veya QR kodunu tarat</div>
+      <div class="class-grid" id="classGrid"></div>
+      <div class="login-or">veya</div>
+      <button class="qr-login-btn" onclick="openCamera(true)">📷 QR Kod ile Giriş Yap</button>
     </div>
-
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num" id="stat-users">12.847</div>
-        <div class="stat-label">Kayıtlı Kullanıcı</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-codes">58.203</div>
-        <div class="stat-label">Taranan Barkod</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">₺2,4M</div>
-        <div class="stat-label">Dağıtılan Kazanım</div>
-      </div>
-    </div>
-
-    <!-- HOW IT WORKS -->
-    <div style="margin-bottom: 60px;">
-      <div class="section-title">Nasıl Çalışır?</div>
-      <div class="section-sub">4 adımda para kazan</div>
-      <div class="steps-grid">
-        <div class="step-card">
-          <div class="step-num">ADIM 01</div>
-          <div class="step-icon">🛒</div>
-          <h3>Alışveriş Yap</h3>
-          <p>Günlük tükettiğin gıda, içecek, temizlik veya kişisel bakım ürünlerini satın al.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">ADIM 02</div>
-          <div class="step-icon">▦</div>
-          <h3>Barkodu Gir</h3>
-          <p>Ürünün üzerindeki barkod numarasını platformumuza gir, kategoriyi seç.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">ADIM 03</div>
-          <div class="step-icon">⚡</div>
-          <h3>Hesapla</h3>
-          <p>Ürün kategorisine ve fiyatına göre geri kazanım oranın otomatik hesaplanır.</p>
-        </div>
-        <div class="step-card">
-          <div class="step-num">ADIM 04</div>
-          <div class="step-icon">💸</div>
-          <h3>Parana Kavuş</h3>
-          <p>Biriken bakiyeni banka hesabına veya dijital cüzdanına aktarabilirsin.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- CATEGORIES -->
-    <div>
-      <div class="section-title">Kazanım Oranları</div>
-      <div class="section-sub">Ürün kategorisine göre geri kazanım yüzdeleri</div>
-      <div class="categories-grid">
-        <div class="cat-card" onclick="showView('scanner')">
-          <div class="cat-icon">🥛</div>
-          <div class="cat-name">Süt Ürünleri</div>
-          <div class="cat-rate">%8</div>
-          <div class="cat-rate-label">geri kazanım</div>
-        </div>
-        <div class="cat-card" onclick="showView('scanner')">
-          <div class="cat-icon">🥖</div>
-          <div class="cat-name">Ekmek & Unlu</div>
-          <div class="cat-rate">%6</div>
-          <div class="cat-rate-label">geri kazanım</div>
-        </div>
-        <div class="cat-card" onclick="showView('scanner')">
-          <div class="cat-icon">🥤</div>
-          <div class="cat-name">İçecekler</div>
-          <div class="cat-rate">%5</div>
-          <div class="cat-rate-label">geri kazanım</div>
-        </div>
-        <div class="cat-card" onclick="showView('scanner')">
-          <div class="cat-icon">🫙</div>
-          <div class="cat-name">Konserve & Hazır</div>
-          <div class="cat-rate">%7</div>
-          <div class="cat-rate-label">geri kazanım</div>
-        </div>
-        <div class="cat-card" onclick="showView('scanner')">
-          <div class="cat-icon">🧴</div>
-          <div class="cat-name">Kişisel Bakım</div>
-          <div class="cat-rate">%10</div>
-          <div class="cat-rate-label">geri kazanım</div>
-        </div>
-        <div class="cat-card" onclick="showView('scanner')">
-          <div class="cat-icon">🧹</div>
-          <div class="cat-name">Temizlik</div>
-          <div class="cat-rate">%9</div>
-          <div class="cat-rate-label">geri kazanım</div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /landing -->
-
-
-  <!-- ===== SCANNER VIEW ===== -->
-  <div class="view" id="view-scanner">
-    <div class="scanner-layout">
-
-      <!-- LEFT: FORM -->
-      <div class="scan-card">
-        <div class="scan-header">
-          <h2>Barkod Gir</h2>
-          <p>Ürünün barkod numarasını girerek kazanımını hesapla</p>
-        </div>
-
-        <!-- Barcode animation -->
-        <div class="barcode-visual">
-          <div class="scan-line"></div>
-          <div class="barcode-lines" id="barcodeLines">
-            <!-- generated by JS -->
-          </div>
-          <div class="barcode-num-display" id="barcodeDisplay">_ _ _ _ _ _ _ _ _ _ _ _</div>
-        </div>
-
-        <!-- Camera scan button -->
-        <button class="scan-cam-btn" onclick="openCamera()">
-          📷 Kamerayla Barkod Tara
-        </button>
-
-        <!-- Barcode input -->
-        <div class="input-group">
-          <label class="input-label">Barkod Numarası</label>
-          <input
-            type="text"
-            class="barcode-input"
-            id="barcodeInput"
-            placeholder="0 0 0 0 0 0 0 0 0 0 0 0"
-            maxlength="13"
-            oninput="onBarcodeInput(this)"
-          />
-        </div>
-
-        <!-- Barcode prefix hint -->
-        <div id="prefixHint" style="display:none;background:var(--surface2);border:1px solid var(--green-dim);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--green);">
-          <strong>✓ Barkod Eşleşmesi:</strong> <span id="prefixHintText"></span>
-        </div>
-        <div id="prefixWarn" style="display:none;background:rgba(255,94,94,0.08);border:1px solid var(--red);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--red);">
-          ⚠ Barkodun ilk hanesi seçilen kategoriye ait değil. Lütfen kontrol et.
-        </div>
-          <label class="input-label">Ürün Kategorisi</label>
-          <select class="custom-select" id="categorySelect" onchange="calcReward()">
-            <option value="">— Kategori seç —</option>
-            <option value="dairy"    data-rate="0.08" data-icon="🥛" data-prefix="1">🥛 Süt Ürünleri — Barkod "1" ile başlar (%8)</option>
-            <option value="bread"    data-rate="0.06" data-icon="🥖" data-prefix="2">🥖 Ekmek & Unlu Mamüller — Barkod "2" ile başlar (%6)</option>
-            <option value="drinks"   data-rate="0.05" data-icon="🥤" data-prefix="3">🥤 İçecekler — Barkod "3" ile başlar (%5)</option>
-            <option value="canned"   data-rate="0.07" data-icon="🫙" data-prefix="4">🫙 Konserve & Hazır Yemek — Barkod "4" ile başlar (%7)</option>
-            <option value="personal" data-rate="0.10" data-icon="🧴" data-prefix="5">🧴 Kişisel Bakım — Barkod "5" ile başlar (%10)</option>
-            <option value="cleaning" data-rate="0.09" data-icon="🧹" data-prefix="6">🧹 Temizlik Ürünleri — Barkod "6" ile başlar (%9)</option>
-            <option value="snack"    data-rate="0.04" data-icon="🍫" data-prefix="7">🍫 Atıştırmalık — Barkod "7" ile başlar (%4)</option>
-            <option value="frozen"   data-rate="0.06" data-icon="🧊" data-prefix="8">🧊 Dondurulmuş Ürünler — Barkod "8" ile başlar (%6)</option>
-          </select>
-        </div>
-
-        <!-- Price inputs -->
-        <div class="price-input-group">
-          <div class="input-group" style="margin-bottom:0">
-            <label class="input-label">Ürün Fiyatı (₺)</label>
-            <input
-              type="number"
-              class="barcode-input"
-              id="priceInput"
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              style="letter-spacing:1px;font-size:16px"
-              oninput="calcReward()"
-            />
-          </div>
-          <div class="input-group" style="margin-bottom:0">
-            <label class="input-label">Adet</label>
-            <input
-              type="number"
-              class="barcode-input"
-              id="quantityInput"
-              value="1"
-              min="1"
-              max="99"
-              style="letter-spacing:1px;font-size:16px"
-              oninput="calcReward()"
-            />
-          </div>
-        </div>
-
-        <!-- Reward preview -->
-        <div class="result-preview">
-          <div>
-            <div class="result-preview-label">Hesaplanan Kazanım</div>
-            <div style="font-size:12px;color:var(--text-dim);margin-top:4px" id="calcDetail">Bilgileri doldurun</div>
-          </div>
-          <div class="result-preview-amount" id="rewardAmount">
-            <span>₺</span>0,00
-          </div>
-        </div>
-
-        <button class="submit-btn" id="submitBtn" disabled onclick="submitBarcode()">
-          KAZANIMI EKLE →
-        </button>
-      </div><!-- /scan-card -->
-
-      <!-- RIGHT: SIDEBAR -->
-      <div>
-        <!-- Balance -->
-        <div class="sidebar-card">
-          <div class="sidebar-title">💰 Toplam Bakiye</div>
-          <div class="balance-display">
-            <div class="balance-label">Mevcut Bakiye</div>
-            <div class="balance-amount">
-              <span class="balance-currency">₺</span><span id="sidebarBalance">0,00</span>
-            </div>
-            <div class="balance-change" id="balanceChange" style="display:none">+₺0,00 eklendi</div>
-          </div>
-        </div>
-
-        <!-- Rate table -->
-        <div class="sidebar-card">
-          <div class="sidebar-title">📊 Oran Tablosu</div>
-          <div class="rate-row"><div class="rate-cat"><span>🥛</span>Süt Ürünleri</div><div class="rate-pct">%8</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🥖</span>Ekmek & Unlu</div><div class="rate-pct">%6</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🥤</span>İçecekler</div><div class="rate-pct">%5</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🫙</span>Konserve</div><div class="rate-pct">%7</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🧴</span>Kişisel Bakım</div><div class="rate-pct">%10</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🧹</span>Temizlik</div><div class="rate-pct">%9</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🍫</span>Atıştırmalık</div><div class="rate-pct">%4</div></div>
-          <div class="rate-row"><div class="rate-cat"><span>🧊</span>Dondurulmuş</div><div class="rate-pct">%6</div></div>
-        </div>
-
-        <!-- Recent transactions -->
-        <div class="sidebar-card">
-          <div class="sidebar-title">📋 Son İşlemler</div>
-          <div id="txList">
-            <div style="text-align:center;color:var(--text-dim);font-size:13px;padding:20px 0">
-              Henüz işlem yok
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div><!-- /scanner -->
-
-
-  <!-- ===== PROFILE VIEW ===== -->
-  <div class="view" id="view-profile">
-
-    <div class="profile-header">
-      <div class="avatar">🏫</div>
-      <div class="profile-info">
-        <h2>Maya Okulları</h2>
-        <p>maya@gerikaz.tr · Üye olma: Nisan 2026</p>
-      </div>
-      <div class="profile-badge" id="profileBadge">🌱 Başlangıç</div>
-    </div>
-
-    <div class="profile-grid">
-
-      <!-- Stats -->
-      <div class="sidebar-card">
-        <div class="sidebar-title">📈 İstatistiklerim</div>
-        <div class="rate-row"><div>Toplam Barkod</div><div class="rate-pct" id="profileTotalCodes">0</div></div>
-        <div class="rate-row"><div>Toplam Kazanım</div><div class="td-green" id="profileTotalEarned">₺0,00</div></div>
-        <div class="rate-row"><div>En Çok Taranan</div><div style="font-size:13px" id="profileTopCat">—</div></div>
-        <div class="rate-row"><div>Mevcut Bakiye</div><div class="td-green" id="profileBalance">₺0,00</div></div>
-      </div>
-
-      <!-- Withdraw -->
-      <div class="sidebar-card">
-        <div class="sidebar-title">💸 Para Çek</div>
-        <div class="input-group" style="margin-bottom:12px">
-          <label class="input-label">IBAN / Hesap No</label>
-          <input type="text" class="barcode-input" placeholder="TR00 0000 0000 0000 0000 0000 00"
-            style="letter-spacing:1px;font-size:13px"/>
-        </div>
-        <div class="withdraw-row">
-          <div>
-            <label class="input-label">Miktar (₺)</label>
-            <input type="number" class="barcode-input" id="withdrawAmount"
-              placeholder="0.00" style="letter-spacing:1px;font-size:15px"/>
-          </div>
-          <button class="withdraw-btn" onclick="doWithdraw()">Çek →</button>
-        </div>
-      </div>
-
-      <!-- History table -->
-      <div style="grid-column: 1 / -1;">
-        <div class="sidebar-card">
-          <div class="sidebar-title">📋 İşlem Geçmişi</div>
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>Barkod</th>
-                <th>Kategori</th>
-                <th>Fiyat</th>
-                <th>Adet</th>
-                <th>Kazanım</th>
-                <th>Tarih</th>
-              </tr>
-            </thead>
-            <tbody id="historyTableBody">
-              <tr>
-                <td colspan="6" style="text-align:center;color:var(--text-dim);padding:24px 0">
-                  Henüz kayıt yok
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-  </div><!-- /profile -->
-
-</main>
-
-<!-- CAMERA SCANNER MODAL -->
-<div class="cam-overlay" id="camOverlay">
-  <div class="cam-box">
-    <div class="cam-title">📷 Barkod Tara</div>
-    <div class="cam-sub">Ürünün barkodunu kameraya göster</div>
-    <div class="cam-frame">
-      <video id="camVideo" playsinline autoplay muted></video>
-      <div class="cam-corners"></div>
-      <div class="cam-scan-line"></div>
-    </div>
-    <div class="cam-status" id="camStatus">Kamera başlatılıyor...</div>
-    <button class="cam-close" onclick="closeCamera()">✕ Kapat</button>
   </div>
 </div>
 
-<script>
-  // ===== STATE =====
-  const state = {
-    balance: 0,
-    transactions: [],
-    totalEarned: 0,
-    catCount: {}
-  };
-
-  const CATS = {
-    dairy:    { label: 'Süt Ürünleri',  icon: '🥛', rate: 0.08, prefix: '1' },
-    bread:    { label: 'Ekmek & Unlu',  icon: '🥖', rate: 0.06, prefix: '2' },
-    drinks:   { label: 'İçecekler',     icon: '🥤', rate: 0.05, prefix: '3' },
-    canned:   { label: 'Konserve',      icon: '🫙', rate: 0.07, prefix: '4' },
-    personal: { label: 'Kişisel Bakım', icon: '🧴', rate: 0.10, prefix: '5' },
-    cleaning: { label: 'Temizlik',      icon: '🧹', rate: 0.09, prefix: '6' },
-    snack:    { label: 'Atıştırmalık',  icon: '🍫', rate: 0.04, prefix: '7' },
-    frozen:   { label: 'Dondurulmuş',   icon: '🧊', rate: 0.06, prefix: '8' }
-  };
-
-  // ===== BARCODE VISUAL =====
-  function generateBarcodeLines() {
-    const c = document.getElementById('barcodeLines');
-    c.innerHTML = '';
-    const widths  = [1,2,1,3,1,2,2,1,3,1,2,1,2,3,1,1,2,1,2,1,3,2,1,2,1,2,1,1,2,3,1,2];
-    const heights = [100,80,90,100,70,85,95,100,75,90,100,80,85,90,70,100,80,95,85,100,70,90,80,95,100,75,85,90,80,100,70,90];
-    widths.forEach((w, i) => {
-      const bar = document.createElement('div');
-      bar.style.width = w * 3 + 'px';
-      bar.style.height = heights[i] % 100 + '%';
-      bar.style.minHeight = '30%';
-      c.appendChild(bar);
-    });
-  }
-  generateBarcodeLines();
-
-  // ===== NAV =====
-  function showView(id) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + id).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const idx = {landing:0, scanner:1, profile:2}[id];
-    document.querySelectorAll('.nav-btn')[idx].classList.add('active');
-    if (id === 'profile') updateProfile();
-  }
-
-  // ===== INPUT =====
-  function onBarcodeInput(el) {
-    el.value = el.value.replace(/\D/g, '');
-    const num = el.value.padEnd(13, '_');
-    const display = num.split('').join(' ');
-    document.getElementById('barcodeDisplay').textContent = display;
-    calcReward();
-  }
-
-  let currentReward = 0;
-
-  function calcReward() {
-    const barcode  = document.getElementById('barcodeInput').value;
-    const catEl    = document.getElementById('categorySelect');
-    const price    = parseFloat(document.getElementById('priceInput').value) || 0;
-    const qty      = parseInt(document.getElementById('quantityInput').value) || 1;
-    const catKey   = catEl.value;
-    const btn      = document.getElementById('submitBtn');
-    const hintBox  = document.getElementById('prefixHint');
-    const warnBox  = document.getElementById('prefixWarn');
-
-    hintBox.style.display = 'none';
-    warnBox.style.display = 'none';
-
-    if (!barcode || barcode.length < 8 || !catKey || price <= 0) {
-      document.getElementById('rewardAmount').innerHTML = '<span>₺</span>0,00';
-      document.getElementById('calcDetail').textContent = 'Bilgileri doldurun';
-      btn.disabled = true;
-      currentReward = 0;
-      return;
-    }
-
-    const cat = CATS[catKey];
-    const expectedPrefix = cat.prefix;
-    const actualPrefix = barcode[0];
-
-    if (actualPrefix !== expectedPrefix) {
-      warnBox.style.display = 'block';
-    } else {
-      hintBox.style.display = 'block';
-      document.getElementById('prefixHintText').textContent =
-        `"${actualPrefix}" → ${cat.icon} ${cat.label}`;
-    }
-
-    const total = price * qty;
-    const reward = total * cat.rate;
-    currentReward = reward;
-
-    document.getElementById('rewardAmount').innerHTML =
-      `<span>₺</span>${reward.toFixed(2).replace('.', ',')}`;
-    document.getElementById('calcDetail').textContent =
-      `${cat.icon} ${cat.label} · ₺${total.toFixed(2)} × %${Math.round(cat.rate * 100)}`;
-
-    btn.disabled = false;
-  }
-
-  // ===== SUBMIT =====
-  function submitBarcode() {
-    const barcode = document.getElementById('barcodeInput').value;
-    const catKey  = document.getElementById('categorySelect').value;
-    const price   = parseFloat(document.getElementById('priceInput').value);
-    const qty     = parseInt(document.getElementById('quantityInput').value) || 1;
-    const cat     = CATS[catKey];
-
-    if (!barcode || !catKey || !price || currentReward <= 0) return;
-
-    // Add to state
-    state.balance      += currentReward;
-    state.totalEarned  += currentReward;
-    state.catCount[catKey] = (state.catCount[catKey] || 0) + 1;
-
-    const tx = {
-      barcode,
-      catKey,
-      cat,
-      price,
-      qty,
-      reward: currentReward,
-      date: new Date().toLocaleDateString('tr-TR', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })
-    };
-    state.transactions.unshift(tx);
-
-    // Update sidebar balance
-    updateSidebarBalance(currentReward);
-    updateTxList();
-
-    // Toast
-    showToast(`+₺${currentReward.toFixed(2).replace('.', ',')} eklendi!`, `${cat.icon} ${cat.label}`);
-
-    // Reset form
-    document.getElementById('barcodeInput').value = '';
-    document.getElementById('categorySelect').value = '';
-    document.getElementById('priceInput').value = '';
-    document.getElementById('quantityInput').value = '1';
-    document.getElementById('barcodeDisplay').textContent = '_ _ _ _ _ _ _ _ _ _ _ _';
-    document.getElementById('rewardAmount').innerHTML = '<span>₺</span>0,00';
-    document.getElementById('calcDetail').textContent = 'Bilgileri doldurun';
-    document.getElementById('submitBtn').disabled = true;
-    currentReward = 0;
-  }
-
-  function updateSidebarBalance(added) {
-    document.getElementById('sidebarBalance').textContent =
-      state.balance.toFixed(2).replace('.', ',');
-    const chg = document.getElementById('balanceChange');
-    chg.style.display = 'block';
-    chg.textContent = `+₺${added.toFixed(2).replace('.', ',')} eklendi`;
-    setTimeout(() => { chg.style.display = 'none'; }, 3000);
-  }
-
-  function updateTxList() {
-    const list = document.getElementById('txList');
-    if (state.transactions.length === 0) {
-      list.innerHTML = `<div style="text-align:center;color:var(--text-dim);font-size:13px;padding:20px 0">Henüz işlem yok</div>`;
-      return;
-    }
-    list.innerHTML = state.transactions.slice(0, 6).map(tx => `
-      <div class="tx-item">
-        <div class="tx-icon">${tx.cat.icon}</div>
-        <div class="tx-info">
-          <div class="tx-name">${tx.cat.label}</div>
-          <div class="tx-date">${tx.barcode.substring(0,6)}... · ${tx.date}</div>
+<!-- SCANNER -->
+<div class="view" id="view-scanner">
+  <main>
+    <div class="view-heading">Barkod Gir</div>
+    <div class="view-subheading">Ürünü tara veya barkod numarasını yaz</div>
+    <div class="scanner-layout">
+      <div class="card">
+        <button class="cam-btn" onclick="openCamera(false)">📷 Kamerayla Barkod Tara</button>
+        <div class="input-group">
+          <label class="input-label">Barkod Numarası</label>
+          <input type="text" class="barcode-input" id="barcodeInput" placeholder="Barkod numarasını gir veya tara" maxlength="30" oninput="checkSubmit()"/>
         </div>
-        <div class="tx-amount">+₺${tx.reward.toFixed(2).replace('.', ',')}</div>
+        <div class="input-group">
+          <label class="input-label">Ürün Seç</label>
+          <select class="custom-select" id="productSelect" onchange="onProductSelect()">
+            <option value="">— Ürün seç —</option>
+          </select>
+        </div>
+        <div class="product-preview" id="productPreview">
+          <div class="product-icon-big" id="previewIcon"></div>
+          <div><div class="product-name-big" id="previewName"></div><div class="product-cat" id="previewCat"></div></div>
+          <div class="product-pts-big"><span id="previewPts"></span> <span style="font-size:12px;color:var(--text-dim);">puan</span></div>
+        </div>
+        <div class="warn-box" id="warnBox"></div>
+        <button class="submit-btn" id="submitBtn" disabled onclick="submitBarcode()">PUANI KAYDET →</button>
       </div>
-    `).join('');
-  }
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="sidebar-title">🏆 <span id="currentClassName"></span> Puanı</div>
+          <div class="balance-big">
+            <div class="balance-num" id="sidebarPts">0</div>
+            <div class="balance-label">Toplam Puan</div>
+            <div class="balance-added" id="balanceAdded"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="sidebar-title">📋 Son Eklenenler</div>
+          <div id="txList"><div class="empty">Henüz kayıt yok</div></div>
+        </div>
+        <div class="card">
+          <div class="sidebar-title">📦 Ürün Puan Tablosu</div>
+          <table class="prod-table">
+            <thead><tr><th>Ürün</th><th>Puan</th></tr></thead>
+            <tbody id="productTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 
-  // ===== PROFILE =====
-  function updateProfile() {
-    document.getElementById('profileTotalCodes').textContent = state.transactions.length;
-    document.getElementById('profileTotalEarned').textContent = `₺${state.totalEarned.toFixed(2).replace('.', ',')}`;
-    document.getElementById('profileBalance').textContent = `₺${state.balance.toFixed(2).replace('.', ',')}`;
+<!-- LEADERBOARD -->
+<div class="view" id="view-leaderboard">
+  <main>
+    <div class="lb-header">
+      <div class="lb-trophy">🏆</div>
+      <div><div class="lb-title">Sınıf Sıralaması</div><div class="lb-sub">En çok geri dönüşüm yapan sınıflar</div></div>
+    </div>
+    <div class="lb-grid" id="lbGrid"></div>
+  </main>
+</div>
 
-    // Top category
-    let topCat = '—';
-    let max = 0;
-    for (const [k, v] of Object.entries(state.catCount)) {
-      if (v > max) { max = v; topCat = CATS[k].icon + ' ' + CATS[k].label; }
-    }
-    document.getElementById('profileTopCat').textContent = topCat;
+<!-- QR CODES -->
+<div class="view" id="view-qrcodes">
+  <main>
+    <div class="qr-intro">
+      <h2>📱 Sınıf QR Kodları</h2>
+      <p>Her sınıfın QR kodunu yazdırıp çöp kutusuna yapıştırın.<br>Öğrenciler kodu tarayarak doğrudan sınıf hesabına puan ekleyebilir.</p>
+    </div>
+    <div class="qr-grid" id="qrGrid"></div>
+  </main>
+</div>
 
-    // Badge
-    let badge = '🌱 Başlangıç';
-    if (state.totalEarned >= 500) badge = '🏆 Uzman';
-    else if (state.totalEarned >= 100) badge = '⭐ Gelişiyor';
-    else if (state.totalEarned >= 20) badge = '🌿 Aktif';
-    document.getElementById('profileBadge').textContent = badge;
+<!-- PROFILE -->
+<div class="view" id="view-profile">
+  <main>
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <div><div class="profile-name" id="profileName"></div><div class="profile-email">Maya Okulları · Geri Dönüşüm Sistemi</div></div>
+      <div class="profile-badge-label" id="profileBadge"></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="profileTotalCodes">0</div><div class="stat-label">Taranan Ürün</div></div>
+      <div class="stat-box"><div class="stat-num" id="profileTotalPts">0</div><div class="stat-label">Toplam Puan</div></div>
+    </div>
+    <div class="card">
+      <div class="sidebar-title" style="margin-bottom:14px;">📋 Kayıt Geçmişi</div>
+      <table class="history-table">
+        <thead><tr><th>Barkod</th><th>Ürün</th><th>Puan</th><th>Tarih</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
 
-    // History table
-    const tbody = document.getElementById('historyTableBody');
-    if (state.transactions.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:24px 0">Henüz kayıt yok</td></tr>`;
-    } else {
-      tbody.innerHTML = state.transactions.map(tx => `
-        <tr>
-          <td class="td-code">${tx.barcode}</td>
-          <td>${tx.cat.icon} ${tx.cat.label}</td>
-          <td>₺${tx.price.toFixed(2)}</td>
-          <td>${tx.qty}</td>
-          <td class="td-green">+₺${tx.reward.toFixed(2).replace('.', ',')}</td>
-          <td style="color:var(--text-dim);font-size:12px">${tx.date}</td>
-        </tr>
-      `).join('');
-    }
-  }
-
-  // ===== WITHDRAW =====
-  function doWithdraw() {
-    const amt = parseFloat(document.getElementById('withdrawAmount').value);
-    if (!amt || amt <= 0) { showToast('Geçersiz miktar', 'Lütfen bir miktar girin', true); return; }
-    if (amt > state.balance) { showToast('Yetersiz Bakiye', `Bakiyeniz: ₺${state.balance.toFixed(2)}`, true); return; }
-    state.balance -= amt;
-    updateProfile();
-    document.getElementById('sidebarBalance').textContent = state.balance.toFixed(2).replace('.', ',');
-    document.getElementById('withdrawAmount').value = '';
-    showToast(`₺${amt.toFixed(2)} çekildi!`, 'İşlem başarıyla tamamlandı');
-  }
-
-  // ===== TOAST =====
-  function showToast(title, sub, isError = false) {
-    const t = document.getElementById('toast');
-    document.getElementById('toastTitle').textContent = title;
-    document.getElementById('toastSub').textContent = sub;
-    t.style.borderColor = isError ? 'var(--red)' : 'var(--green)';
-    t.querySelector('.toast-icon').style.background = isError ? 'var(--red)' : 'var(--green)';
-    t.querySelector('.toast-icon').textContent = isError ? '✕' : '✓';
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
-
-  // ===== CAMERA BARCODE SCANNER =====
-  let codeReader = null;
-  let camStream = null;
-
-  async function openCamera() {
-    document.getElementById('camOverlay').classList.add('open');
-    document.getElementById('camStatus').textContent = 'Kamera başlatılıyor...';
-    document.getElementById('camStatus').className = 'cam-status';
-
-    try {
-      // Try ZXing if available
-      if (typeof ZXing !== 'undefined') {
-        codeReader = new ZXing.BrowserMultiFormatReader();
-        const devices = await codeReader.listVideoInputDevices();
-        const deviceId = devices.length > 1 ? devices[devices.length - 1].deviceId : (devices[0]?.deviceId || undefined);
-        document.getElementById('camStatus').textContent = 'Barkodu kameraya göster...';
-        await codeReader.decodeFromVideoDevice(deviceId, 'camVideo', (result, err) => {
-          if (result) {
-            const code = result.getText();
-            onBarcodeScanned(code);
-          }
-        });
-      } else {
-        // Fallback: raw camera stream + manual input hint
-        camStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
-        });
-        document.getElementById('camVideo').srcObject = camStream;
-        document.getElementById('camStatus').textContent = 'Kamera açık — barkodu göster (ZXing yüklenemedi, manuel gir)';
-      }
-    } catch (e) {
-      document.getElementById('camStatus').textContent = 'Kamera erişimi reddedildi veya desteklenmiyor.';
-      document.getElementById('camStatus').className = 'cam-status error';
-    }
-  }
-
-  function onBarcodeScanned(code) {
-    // Fill barcode input
-    document.getElementById('barcodeInput').value = code.replace(/\D/g, '').substring(0, 13);
-    const num = document.getElementById('barcodeInput').value.padEnd(13, '_');
-    document.getElementById('barcodeDisplay').textContent = num.split('').join(' ');
-
-    // Auto-detect category from first digit
-    const firstDigit = code[0];
-    const prefixMap = { '1':'dairy','2':'bread','3':'drinks','4':'canned','5':'personal','6':'cleaning','7':'snack','8':'frozen' };
-    if (prefixMap[firstDigit]) {
-      document.getElementById('categorySelect').value = prefixMap[firstDigit];
-    }
-
-    document.getElementById('camStatus').textContent = '✓ Barkod okundu: ' + code;
-    document.getElementById('camStatus').className = 'cam-status success';
-
-    calcReward();
-
-    setTimeout(() => closeCamera(), 1200);
-  }
-
-  function closeCamera() {
-    document.getElementById('camOverlay').classList.remove('open');
-    if (codeReader) { try { codeReader.reset(); } catch(e){} codeReader = null; }
-    if (camStream)  { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
-    const vid = document.getElementById('camVideo');
-    vid.srcObject = null;
-  }
-
-  // Close on overlay click
-  document.getElementById('camOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeCamera();
-  });
-  function animateCount(el, target, prefix='', suffix='') {
-    let start = 0;
-    const step = target / 60;
-    const timer = setInterval(() => {
-      start = Math.min(start + step, target);
-      el.textContent = prefix + Math.floor(start).toLocaleString('tr-TR') + suffix;
-      if (start >= target) clearInterval(timer);
-    }, 16);
-  }
-  setTimeout(() => {
-    animateCount(document.getElementById('stat-users'), 12847);
-    animateCount(document.getElementById('stat-codes'), 58203);
-  }, 400);
-</script>
-<!-- FOOTER -->
-<footer style="
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid #1e2b20;
-  background: #0a0e0b;
-  padding: 24px;
-  text-align: center;
-  font-size: 12px;
-  color: #6b8a72;
-  letter-spacing: 0.3px;
-  line-height: 1.7;
-">
-  <span style="color:#3dff7a;font-weight:600;">GeriKazanım</span> &nbsp;·&nbsp;
-  Bu Web Sitesi <strong style="color:#e8f5ec;">Maya Okulları</strong> İçin
-  <strong style="color:#e8f5ec;">Onur BOZOK</strong>,
-  <strong style="color:#e8f5ec;">Göktürk ŞİMŞEK</strong>,
-  <strong style="color:#e8f5ec;">Yiğit ÇETİN</strong> ve
-  <strong style="color:#e8f5ec;">Ozan ŞENTEKİN</strong> Tarafından Geliştirilmiştir.
-  &nbsp;·&nbsp; © 2026
+<footer>
+  Bu Web Sitesi <strong>Maya Okulları</strong> İçin
+  <strong>Onur BOZOK</strong>, <strong>Göktürk ŞİMŞEK</strong>,
+  <strong>Yiğit ÇETİN</strong> ve <strong>Ozan ŞENTEKİN</strong> Tarafından Geliştirilmiştir.
 </footer>
 
+<script>
+// ===== CONFIG =====
+const CLASSES = ['5/A','5/B','6/A','6/B','6/C','6/D','7/A','7/B','8/A','8/B'];
+
+const PRODUCTS = [
+  {id:'p01',name:'Plastik Şişe',      cat:'Plastik', icon:'🍶', pts:10},
+  {id:'p02',name:'Cam Şişe',          cat:'Cam',     icon:'🍾', pts:15},
+  {id:'p03',name:'Teneke Kutu',        cat:'Metal',   icon:'🥫', pts:12},
+  {id:'p04',name:'Karton Kutu',        cat:'Kağıt',   icon:'📦', pts:8},
+  {id:'p05',name:'Süt Kutusu',         cat:'Karton',  icon:'🥛', pts:10},
+  {id:'p06',name:'Meyve Suyu Kutusu',  cat:'Karton',  icon:'🧃', pts:10},
+  {id:'p07',name:'Plastik Poşet',      cat:'Plastik', icon:'🛍️', pts:5},
+  {id:'p08',name:'Gazlı İçecek Kutusu',cat:'Metal',   icon:'🥤', pts:12},
+  {id:'p09',name:'Yoğurt Kabı',        cat:'Plastik', icon:'🫙', pts:8},
+  {id:'p10',name:'Konserve Kutusu',    cat:'Metal',   icon:'🥡', pts:12},
+  {id:'p11',name:'Kağıt Bardak',       cat:'Kağıt',   icon:'☕', pts:6},
+  {id:'p12',name:'Plastik Bardak',     cat:'Plastik', icon:'🧃', pts:6},
+  {id:'p13',name:'Gazete / Dergi',     cat:'Kağıt',   icon:'📰', pts:5},
+  {id:'p14',name:'Alüminyum Folyo',    cat:'Metal',   icon:'🔲', pts:8},
+  {id:'p15',name:'Diğer Plastik',      cat:'Plastik', icon:'♻️', pts:5},
+];
+
+// ===== STATE =====
+// allCodes: global set to detect duplicate barcodes across all classes
+const allCodes = new Set();
+const classData = {};
+CLASSES.forEach(c => { classData[c] = { pts:0, transactions:[] }; });
+
+let currentClass = null;
+let selectedProduct = null;
+
+// ===== THEME =====
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme', isDark?'light':'dark');
+  document.getElementById('themeBtn').textContent = isDark?'☀️':'🌙';
+}
+
+// ===== NAV =====
+const NAV_IDS = ['navScan','navLb','navQr','navProfile','navLogout'];
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  NAV_IDS.forEach(b=>{ const el=document.getElementById(b); if(el) el.classList.remove('active'); });
+  const map = {scanner:'navScan',leaderboard:'navLb',qrcodes:'navQr',profile:'navProfile'};
+  if(map[id]) document.getElementById(map[id]).classList.add('active');
+  if(id==='leaderboard') renderLeaderboard();
+  if(id==='qrcodes') renderQR();
+  if(id==='profile') renderProfile();
+}
+
+function setLoggedInNav(show){
+  NAV_IDS.forEach(id=>{ document.getElementById(id).style.display = show?'inline-flex':'none'; });
+  document.getElementById('classBadge').classList.toggle('show', show);
+}
+
+// ===== LOGIN =====
+function buildLoginGrid(){
+  document.getElementById('classGrid').innerHTML = CLASSES.map(c=>
+    `<button class="class-btn" onclick="loginAs('${c}')">${c}</button>`
+  ).join('');
+}
+
+function loginAs(cls){
+  currentClass = cls;
+  document.getElementById('classBadgeText').textContent = cls;
+  document.getElementById('currentClassName').textContent = cls;
+  setLoggedInNav(true);
+  updateSidebarPts();
+  updateTxList();
+  showView('scanner');
+  showToast('Giriş yapıldı!', cls+' sınıfına hoş geldin 👋');
+}
+
+function logout(){
+  currentClass = null;
+  selectedProduct = null;
+  resetForm();
+  setLoggedInNav(false);
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-login').classList.add('active');
+}
+
+// ===== PRODUCT SELECT =====
+function buildProductSelect(){
+  document.getElementById('productSelect').innerHTML =
+    '<option value="">— Ürün seç —</option>' +
+    PRODUCTS.map(p=>`<option value="${p.id}">${p.icon} ${p.name} — ${p.pts} puan</option>`).join('');
+  document.getElementById('productTableBody').innerHTML =
+    PRODUCTS.map(p=>`<tr><td>${p.icon} ${p.name}</td><td class="td-green">${p.pts} puan</td></tr>`).join('');
+}
+
+function onProductSelect(){
+  const id = document.getElementById('productSelect').value;
+  selectedProduct = PRODUCTS.find(p=>p.id===id)||null;
+  const preview = document.getElementById('productPreview');
+  if(selectedProduct){
+    document.getElementById('previewIcon').textContent = selectedProduct.icon;
+    document.getElementById('previewName').textContent = selectedProduct.name;
+    document.getElementById('previewCat').textContent = selectedProduct.cat;
+    document.getElementById('previewPts').textContent = selectedProduct.pts;
+    preview.classList.add('show');
+  } else {
+    preview.classList.remove('show');
+  }
+  checkSubmit();
+}
+
+// ===== BARCODE CHECK =====
+function checkSubmit(){
+  const barcode = document.getElementById('barcodeInput').value.trim();
+  const warn = document.getElementById('warnBox');
+  const btn = document.getElementById('submitBtn');
+  warn.classList.remove('show'); warn.textContent='';
+
+  if(!barcode || !selectedProduct){ btn.disabled=true; return; }
+
+  if(allCodes.has(barcode)){
+    // Find which class registered it
+    let foundIn = '';
+    for(const cls of CLASSES){
+      if(classData[cls].transactions.find(t=>t.barcode===barcode)){ foundIn=cls; break; }
+    }
+    warn.textContent = `⚠ Bu barkod daha önce${foundIn?' '+foundIn+' sınıfı tarafından':''} kaydedilmiş! Aynı barkod tekrar kabul edilmez.`;
+    warn.classList.add('show');
+    btn.disabled=true; return;
+  }
+  btn.disabled=false;
+}
+
+// ===== SUBMIT =====
+function submitBarcode(){
+  const barcode = document.getElementById('barcodeInput').value.trim();
+  if(!barcode||!selectedProduct||!currentClass) return;
+  if(allCodes.has(barcode)){ showToast('Hata!','Bu barkod zaten kayıtlı!',true); return; }
+
+  allCodes.add(barcode);
+  classData[currentClass].pts += selectedProduct.pts;
+  classData[currentClass].transactions.unshift({
+    barcode, product:selectedProduct,
+    date:new Date().toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  });
+
+  updateSidebarPts(selectedProduct.pts);
+  updateTxList();
+  showToast(`+${selectedProduct.pts} puan kazanıldı!`,`${selectedProduct.icon} ${selectedProduct.name}`);
+  resetForm();
+}
+
+function resetForm(){
+  document.getElementById('barcodeInput').value='';
+  document.getElementById('productSelect').value='';
+  document.getElementById('productPreview').classList.remove('show');
+  document.getElementById('warnBox').classList.remove('show');
+  document.getElementById('submitBtn').disabled=true;
+  selectedProduct=null;
+}
+
+function updateSidebarPts(added){
+  if(!currentClass) return;
+  document.getElementById('sidebarPts').textContent = classData[currentClass].pts;
+  if(added){
+    const el=document.getElementById('balanceAdded');
+    el.textContent=`+${added} puan eklendi`;
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),3000);
+  }
+}
+
+function updateTxList(){
+  if(!currentClass) return;
+  const txs = classData[currentClass].transactions.slice(0,8);
+  const list = document.getElementById('txList');
+  if(!txs.length){ list.innerHTML='<div class="empty">Henüz kayıt yok</div>'; return; }
+  list.innerHTML = txs.map(tx=>`
+    <div class="tx-item">
+      <div class="tx-icon">${tx.product.icon}</div>
+      <div class="tx-info">
+        <div class="tx-name">${tx.product.name}</div>
+        <div class="tx-sub">${tx.barcode.substring(0,10)}${tx.barcode.length>10?'...':''} · ${tx.date}</div>
+      </div>
+      <div class="tx-pts">+${tx.product.pts}</div>
+    </div>`).join('');
+}
+
+// ===== LEADERBOARD =====
+function renderLeaderboard(){
+  const sorted = CLASSES.map(c=>({name:c,pts:classData[c].pts,count:classData[c].transactions.length}))
+    .sort((a,b)=>b.pts-a.pts);
+  const max = sorted[0]?.pts||1;
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('lbGrid').innerHTML = sorted.map((cl,i)=>`
+    <div class="lb-row ${i<3?'rank-'+(i+1):''}">
+      <div class="lb-rank">${medals[i]||i+1}</div>
+      <div style="flex:1">
+        <div class="lb-class-name">${cl.name}</div>
+        <div class="lb-count">${cl.count} ürün kaydedildi</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${max?Math.round(cl.pts/max*100):0}%"></div></div>
+      </div>
+      <div class="lb-pts">${cl.pts}<br><span>puan</span></div>
+    </div>`).join('');
+}
+
+// ===== QR CODES =====
+let qrRendered = false;
+function renderQR(){
+  if(qrRendered) return;
+  qrRendered = true;
+  document.getElementById('qrGrid').innerHTML = CLASSES.map(c=>`
+    <div class="qr-card">
+      <div class="qr-card-title">${c}</div>
+      <div class="qr-code-wrap" id="qr-${c.replace('/','_')}"></div>
+      <button class="qr-dl" onclick="downloadQR('${c}')">⬇ İndir</button>
+    </div>`).join('');
+
+  CLASSES.forEach(c=>{
+    const el = document.getElementById('qr-'+c.replace('/','_'));
+    try {
+      new QRCode(el,{
+        text:'MAYA_CLASS:'+c,
+        width:120,height:120,
+        colorDark:'#000000',colorLight:'#ffffff',
+        correctLevel:QRCode.CorrectLevel.H
+      });
+    } catch(e){ el.innerHTML='<div style="font-size:11px;color:var(--red)">Yüklenemedi</div>'; }
+  });
+}
+
+function downloadQR(cls){
+  const el = document.getElementById('qr-'+cls.replace('/','_'));
+  const canvas = el.querySelector('canvas');
+  const img = el.querySelector('img');
+  let src = '';
+  if(canvas) src = canvas.toDataURL();
+  else if(img) src = img.src;
+  else { showToast('Hata','QR bulunamadı',true); return; }
+  const a = document.createElement('a');
+  a.download = 'QR_Sinif_'+cls.replace('/','_')+'.png';
+  a.href = src; a.click();
+}
+
+// ===== PROFILE =====
+function renderProfile(){
+  if(!currentClass) return;
+  const cd = classData[currentClass];
+  document.getElementById('profileAvatar').textContent = currentClass;
+  document.getElementById('profileName').textContent = currentClass+' Sınıfı';
+  document.getElementById('profileTotalCodes').textContent = cd.transactions.length;
+  document.getElementById('profileTotalPts').textContent = cd.pts;
+  let badge='🌱 Başlangıç';
+  if(cd.pts>=500) badge='🏆 Şampiyon';
+  else if(cd.pts>=200) badge='⭐ Uzman';
+  else if(cd.pts>=50) badge='🌿 Aktif';
+  document.getElementById('profileBadge').textContent = badge;
+  const tbody = document.getElementById('historyBody');
+  if(!cd.transactions.length){ tbody.innerHTML='<tr><td colspan="4" class="empty">Henüz kayıt yok</td></tr>'; return; }
+  tbody.innerHTML = cd.transactions.map(tx=>`
+    <tr>
+      <td class="td-code">${tx.barcode}</td>
+      <td>${tx.product.icon} ${tx.product.name}</td>
+      <td class="td-green">+${tx.product.pts}</td>
+      <td style="color:var(--text-dim);font-size:12px">${tx.date}</td>
+    </tr>`).join('');
+}
+
+// ===== CAMERA =====
+let codeReader=null, camStream=null, camIsQrLogin=false;
+
+async function openCamera(isQrLogin=false){
+  camIsQrLogin = isQrLogin;
+  document.getElementById('camTitle').textContent = isQrLogin ? '📷 QR Kod ile Giriş' : '📷 Barkod Tara';
+  document.getElementById('camSubtitle').textContent = isQrLogin ? 'Sınıf QR kodunu kameraya göster' : 'Ürünün barkodunu kameraya göster';
+  document.getElementById('camOverlay').classList.add('open');
+  document.getElementById('camStatus').textContent='Kamera başlatılıyor...';
+  document.getElementById('camStatus').className='cam-status';
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const video = document.getElementById('camVideo');
+    video.srcObject = camStream;
+    document.getElementById('camStatus').textContent = isQrLogin ? 'QR kodu kameraya göster...' : 'Barkodu kameraya göster...';
+    if(typeof ZXing !== 'undefined'){
+      codeReader = new ZXing.BrowserMultiFormatReader();
+      codeReader.decodeFromStream(camStream, video, (result,err)=>{
+        if(result){
+          const text = result.getText();
+          if(camIsQrLogin){
+            if(text.startsWith('MAYA_CLASS:')){
+              const cls = text.replace('MAYA_CLASS:','');
+              if(CLASSES.includes(cls)){
+                document.getElementById('camStatus').textContent='✓ '+cls+' sınıfı tanındı!';
+                document.getElementById('camStatus').className='cam-status ok';
+                setTimeout(()=>{ closeCamera(); loginAs(cls); },800);
+              }
+            }
+          } else {
+            document.getElementById('barcodeInput').value = text;
+            document.getElementById('camStatus').textContent='✓ Barkod okundu!';
+            document.getElementById('camStatus').className='cam-status ok';
+            checkSubmit();
+            setTimeout(()=>closeCamera(),900);
+          }
+        }
+      });
+    } else {
+      document.getElementById('camStatus').textContent='Kamera açık (manuel giriş gerekebilir)';
+    }
+  } catch(e){
+    document.getElementById('camStatus').textContent='Kamera erişimi reddedildi.';
+    document.getElementById('camStatus').className='cam-status err';
+  }
+}
+
+function closeCamera(){
+  document.getElementById('camOverlay').classList.remove('open');
+  if(codeReader){try{codeReader.reset();}catch(e){} codeReader=null;}
+  if(camStream){camStream.getTracks().forEach(t=>t.stop()); camStream=null;}
+  document.getElementById('camVideo').srcObject=null;
+}
+document.getElementById('camOverlay').addEventListener('click',function(e){if(e.target===this)closeCamera();});
+
+// ===== TOAST =====
+function showToast(title,sub,isError=false){
+  document.getElementById('toastTitle').textContent=title;
+  document.getElementById('toastSub').textContent=sub;
+  const t=document.getElementById('toast');
+  const icon=document.getElementById('toastIcon');
+  t.style.borderColor=isError?'var(--red)':'var(--green)';
+  icon.style.background=isError?'var(--red)':'var(--green)';
+  icon.textContent=isError?'✕':'✓';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ===== INIT =====
+buildLoginGrid();
+buildProductSelect();
+setLoggedInNav(false);
+</script>
 </body>
 </html>
