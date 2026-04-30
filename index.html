@@ -915,7 +915,7 @@ function adminResetClass(cls){
   for(let i=globalLog.length-1;i>=0;i--){ if(globalLog[i].class===cls) globalLog.splice(i,1); }
   classData[cls]={pts:0,transactions:[]};
   renderAdmin();
-  showToast('Sıfırlandı',cls+' sınıfı verileri silindi.',true);
+  showToast('Sıfırlandı',cls+' sınıfı verileri silindi.',false);
 }
 
 function toggleLock(){
