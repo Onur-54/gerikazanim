@@ -231,6 +231,9 @@ footer strong{color:var(--text);}
   <div class="locked-icon">🔒</div>
   <div class="locked-title">Site Kilitlendi</div>
   <div class="locked-sub">Bu site şu an yönetici tarafından kilitlenmiştir. Lütfen daha sonra tekrar deneyin.</div>
+  <div style="margin-top:40px;">
+    <span class="admin-link" onclick="openAdminLogin()" style="font-size:11px;opacity:0.3;">⚙</span>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -557,6 +560,8 @@ function confirmPw(){
     if(val===ADMIN_PASSWORD){
       closePwModal();
       isAdmin=true;
+      // Hide locked screen for admin
+      document.getElementById('lockedScreen').classList.remove('show');
       showNav(['navAdmin','navLogout']);
       document.getElementById('navLogout').onclick=adminLogout;
       showView('admin');
@@ -607,6 +612,10 @@ function adminLogout(){
   showNav([]);
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-login').classList.add('active');
+  // Re-show lock screen if still locked
+  if(siteLocked){
+    document.getElementById('lockedScreen').classList.add('show');
+  }
 }
 
 // ===== BARCODE LOOKUP =====
@@ -915,7 +924,7 @@ function adminResetClass(cls){
   for(let i=globalLog.length-1;i>=0;i--){ if(globalLog[i].class===cls) globalLog.splice(i,1); }
   classData[cls]={pts:0,transactions:[]};
   renderAdmin();
-  showToast('Sıfırlandı',cls+' sınıfı verileri silindi.',false);
+  showToast('Sıfırlandı',cls+' sınıfı verileri silindi.',true);
 }
 
 function toggleLock(){
