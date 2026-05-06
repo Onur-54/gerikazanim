@@ -79,7 +79,7 @@
     </div>
 
     <div class="pg" id="pgRanking">
-        <div class="vh">Sınıf Sıralaması</div>
+        <div class="vh">Liderlik Tablosu</div>
         <div class="card" id="rankList" style="padding:0;">
             <p style='padding:20px; text-align:center; color:var(--dim);'>Yükleniyor...</p>
         </div>
@@ -108,6 +108,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Şubeler ve giriş şifreleri
         const CLASSES = {
             '5/A': 'maya5A', '5/B': 'maya5B', '6/A': 'maya6A', '6/B': 'maya6B',
             '7/A': 'maya7A', '7/B': 'maya7B', 'ADMIN': 'MayaAdmin2026'
@@ -116,30 +117,31 @@
         let currentClass = "";
         let selectedLogin = "";
 
-        // SIRALAMA - VERİ OKUMA HATASI BURADA DÜZELTİLDİ
+        // SIRALAMA - Şube isimleri ve puanları gösterir
         db.ref('scores').on('value', (snap) => {
             const data = snap.val() || {};
             const list = document.getElementById('rankList');
             
-            // Veriyi diziye çevir ve sayısal olarak sırala
-            const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+            // Tüm tanımlı sınıfları listeye dahil et (puanı olmayanlar 0 gözüksün)
+            let scoreArray = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(className => {
+                return {
+                    name: className,
+                    score: typeof data[className] === 'number' ? data[className] : 0
+                };
+            });
+
+            // Puanlara göre büyükten küçüğe sırala
+            scoreArray.sort((a, b) => b.score - a.score);
             
-            if (sorted.length === 0) {
-                list.innerHTML = "<p style='padding:20px; text-align:center; color:var(--dim);'>Henüz puan kaydedilmemiş.</p>";
-            } else {
-                list.innerHTML = sorted.map((s, i) => {
-                    // Sınıf isminin sonuna "Sınıfı" eklemesi için kontrol
-                    const className = s[0].includes('/') ? s[0] : s[0] + " Sınıfı";
-                    return `
-                    <div class="rank-item">
-                        <span><b style="color:var(--dim)">#${i+1}</b> &nbsp; ${className}</span>
-                        <span style="color:var(--green); font-weight:800; font-size:18px;">${s[1]} Puan</span>
-                    </div>`;
-                }).join('');
-            }
+            list.innerHTML = scoreArray.map((s, i) => `
+                <div class="rank-item">
+                    <span><b style="color:var(--dim)">#${i+1}</b> &nbsp; ${s.name} Şubesi</span>
+                    <span style="color:var(--green); font-weight:800; font-size:18px;">${s.score} Puan</span>
+                </div>
+            `).join('');
         });
 
-        // ADMIN ONAY LİSTESİ
+        // ADMIN ONAY SİSTEMİ
         db.ref('approvals').on('value', (snap) => {
             const data = snap.val() || {};
             const container = document.getElementById('pendingList');
@@ -183,6 +185,7 @@
                 else { currentClass = selectedLogin; showPg('scanner'); document.getElementById('curClassTitle').innerText = currentClass + " Kaydı"; }
                 document.getElementById('btnLogout').classList.add('on');
                 document.getElementById('btnRank').classList.add('on');
+                document.getElementById('pwIn').value = "";
             } else { alert("Şifre Yanlış!"); }
         }
 
@@ -204,14 +207,12 @@
         }
 
         function approveItem(id, cls, pts) {
-            db.ref('scores/' + cls).transaction((curr) => {
-                // Mevcut değer bir nesneyse veya hatalıysa sıfırdan başla, sayıysa üzerine ekle
-                return (typeof curr === 'number' ? curr : 0) + pts;
-            }).then(() => db.ref('approvals/' + id).remove());
+            db.ref('scores/' + cls).transaction((curr) => (typeof curr === 'number' ? curr : 0) + pts)
+            .then(() => db.ref('approvals/' + id).remove());
         }
 
         function rejectItem(id) { db.ref('approvals/' + id).remove(); }
-        function resetPoints() { if(confirm("Tüm puanlar silinsin mi?")) db.ref('scores').remove(); }
+        function resetPoints() { if(confirm("Tüm puanlar sıfırlansın mı?")) db.ref('scores').remove(); }
         function logout() { location.reload(); }
 
         buildClasses();
