@@ -2,28 +2,33 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeriKazanım — Maya Okulları</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root { --bg:#0d1117; --surface:#161b22; --green:#3fb950; --text:#e6edf3; --border:#30363d; }
-        body { font-family: sans-serif; background:var(--bg); color:var(--text); text-align:center; padding:20px; }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:500px; margin:auto; }
-        .rank-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); }
-        .btn { background:var(--green); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; margin-top:10px; font-weight:bold; }
-        input { width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid var(--border); background:#0d1117; color:white; }
+        body { font-family: sans-serif; background:var(--bg); color:var(--text); text-align:center; padding:20px; margin:0; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:500px; margin:20px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .rank-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items:center; }
+        .rank-item:last-child { border-bottom: none; }
+        .btn { background:var(--green); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; margin-top:10px; font-weight:bold; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        input { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid var(--border); background:#0d1117; color:white; box-sizing: border-box; }
         .pg { display:none; } .on { display:block; }
+        .class-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px; }
     </style>
 </head>
 <body>
 
-    <h2 style="color:var(--green); margin-bottom:20px;">♻️ Maya GeriKazanım</h2>
+    <h2 style="color:var(--green); margin-top:10px;">♻️ Maya GeriKazanım</h2>
 
     <div id="pgLogin" class="pg on">
         <div class="card">
-            <h3>Sınıf Seçin</h3>
-            <div id="classGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:15px;"></div>
-            <button class="btn" style="background:#21262d; margin-top:20px;" onclick="openLogin('ADMIN')">⚙️ Yönetici</button>
+            <h3>Sınıfını Seç</h3>
+            <div id="classGrid" class="class-grid"></div>
+            <button class="btn" style="background:#21262d; margin-top:20px;" onclick="openLogin('ADMIN')">⚙️ Yönetici Paneli</button>
+            <button class="btn" style="background:#21262d; margin-top:10px;" onclick="showPg('rank')">🏆 Mevcut Sıralama</button>
         </div>
     </div>
 
@@ -32,32 +37,33 @@
             <h3 id="pwTitle">Giriş</h3>
             <input type="password" id="pwIn" placeholder="Şifre">
             <button class="btn" onclick="checkPw()">Giriş Yap</button>
-            <button class="btn" style="background:none;" onclick="showPg('login')">Geri</button>
+            <button class="btn" style="background:none; color:#7d8590;" onclick="showPg('login')">Vazgeç</button>
         </div>
     </div>
 
     <div id="pgRank" class="pg">
         <div class="card">
             <h3>🏆 Liderlik Tablosu</h3>
-            <div id="rankList"></div>
-            <button class="btn" onclick="showPg('login')">Ana Menü</button>
+            <div id="rankList">Veriler yükleniyor...</div>
+            <button class="btn" style="margin-top:20px;" onclick="showPg('login')">Ana Menüye Dön</button>
         </div>
     </div>
 
     <div id="pgScan" class="pg">
         <div class="card">
-            <h3 id="scanTitle">Barkod Kaydı</h3>
-            <input type="text" id="bcIn" placeholder="Barkod Numarasını Yazın">
+            <h3 id="scanTitle">Kayıt</h3>
+            <p style="color:#7d8590; margin-bottom:15px;">Barkod numarasını girip onaya gönderin.</p>
+            <input type="text" id="bcIn" placeholder="Barkod No">
             <button class="btn" onclick="sendToAdmin()">ONAYA GÖNDER</button>
-            <button class="btn" style="background:#f85149;" onclick="showPg('login')">Çıkış</button>
+            <button class="btn" style="background:#f85149;" onclick="showPg('login')">Çıkış Yap</button>
         </div>
     </div>
 
     <div id="pgAdmin" class="pg">
         <div class="card">
-            <h3>Onay Bekleyen Kayıtlar</h3>
-            <div id="adminList"></div>
-            <button class="btn" style="background:#f85149;" onclick="showPg('login')">Çıkış</button>
+            <h3>Bekleyen Onaylar</h3>
+            <div id="adminList" style="text-align:left;"></div>
+            <button class="btn" style="background:#f85149; margin-top:20px;" onclick="showPg('login')">Panelden Çık</button>
         </div>
     </div>
 
@@ -69,36 +75,47 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        // SINIFLARDA "/" YERİNE "-" KULLANDIK (Kritik Düzeltme)
+        // 6-C VE 6-D EKLENDİ
         const CLASSES = {
-            '5-A': 'maya5A', '5-B': 'maya5B', '6-A': 'maya6A', '6-B': 'maya6B',
-            '7-A': 'maya7A', '7-B': 'maya7B', 'ADMIN': 'MayaAdmin2026'
+            '5-A': 'maya5A', '5-B': 'maya5B', 
+            '6-A': 'maya6A', '6-B': 'maya6B', '6-C': 'maya6C', '6-D': 'maya6D',
+            '7-A': 'maya7A', '7-B': 'maya7B', 
+            'ADMIN': 'MayaAdmin2026'
         };
 
         let selected = "";
         let currentClass = "";
 
-        // SIRALAMA TAKİBİ
+        // SIRALAMA SİSTEMİ
         db.ref('scores').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('rankList');
-            let arr = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(c => ({name: c, score: data[c] || 0}));
+            let arr = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(c => ({
+                name: c, 
+                score: Number(data[c] || 0)
+            }));
+            
             arr.sort((a,b) => b.score - a.score);
+            
             list.innerHTML = arr.map((x, i) => `
                 <div class="rank-item">
-                    <span>#${i+1} ${x.name}</span>
-                    <span style="color:var(--green); font-weight:bold;">${x.score} Puan</span>
+                    <span><b>#${i+1}</b> ${x.name} Şubesi</span>
+                    <span style="color:var(--green); font-weight:bold; font-size:1.1em;">${x.score} Puan</span>
                 </div>`).join('');
         });
 
-        // ADMIN ONAY TAKİBİ
+        // ADMIN PANELİ TAKİBİ
         db.ref('approvals').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('adminList');
-            list.innerHTML = Object.entries(data).map(([id, item]) => `
-                <div style="padding:10px; border:1px solid var(--border); margin-bottom:10px;">
-                    <p>${item.cls} - ${item.bc}</p>
-                    <button class="btn" onclick="approve('${id}', '${item.cls}')">Onayla (+5)</button>
+            const entries = Object.entries(data);
+            if(entries.length === 0) { list.innerHTML = "<p style='text-align:center; color:#7d8590;'>Bekleyen kayıt yok.</p>"; return; }
+            
+            list.innerHTML = entries.map(([id, item]) => `
+                <div style="padding:15px; border:1px solid var(--border); border-radius:8px; margin-bottom:10px; background:#0d1117;">
+                    <p><b>Sınıf:</b> ${item.cls}</p>
+                    <p><b>Barkod:</b> ${item.bc}</p>
+                    <button class="btn" onclick="approve('${id}', '${item.cls}')">Onayla (+5 Puan)</button>
                 </div>`).join('');
         });
 
@@ -116,32 +133,32 @@
         function openLogin(c) { selected = c; showPg('pw'); document.getElementById('pwTitle').innerText = c + " Girişi"; }
         
         function checkPw() {
-            if(document.getElementById('pwIn').value === CLASSES[selected]) {
+            const input = document.getElementById('pwIn');
+            if(input.value === CLASSES[selected]) {
                 if(selected === 'ADMIN') showPg('admin');
                 else { currentClass = selected; showPg('scan'); document.getElementById('scanTitle').innerText = currentClass + " Kaydı"; }
-                document.getElementById('pwIn').value = "";
-            } else { alert("Yanlış Şifre!"); }
+                input.value = "";
+            } else { alert("Hatalı Şifre!"); }
         }
 
         function showPg(id) {
             document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
             document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on');
-            if(id === 'login') { // Ana menüdeyken de sıralamayı görsünler istersen bunu kullanabilirsin
-                showPg('rank'); 
-            }
         }
 
         function sendToAdmin() {
             const bc = document.getElementById('bcIn').value;
-            if(!bc) return alert("Barkod gir!");
+            if(bc.length < 3) return alert("Lütfen geçerli bir barkod girin!");
             db.ref('approvals').push({ cls: currentClass, bc: bc }).then(() => {
-                alert("Onaya gönderildi!");
+                alert("Kayıt başarıyla onaya gönderildi!");
                 document.getElementById('bcIn').value = "";
             });
         }
 
         function approve(id, cls) {
-            db.ref('scores/' + cls).transaction(c => (c || 0) + 5).then(() => db.ref('approvals/' + id).remove());
+            db.ref('scores/' + cls).transaction(c => (c || 0) + 5)
+            .then(() => db.ref('approvals/' + id).remove())
+            .catch(e => alert("Hata oluştu: " + e.message));
         }
 
         build();
