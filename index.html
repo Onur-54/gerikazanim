@@ -81,7 +81,7 @@
     <div class="pg" id="pgRanking">
         <div class="vh">Liderlik Tablosu</div>
         <div class="card" id="rankList" style="padding:0;">
-            <p style='padding:20px; text-align:center; color:var(--dim);'>Yükleniyor...</p>
+            <p style='padding:20px; text-align:center; color:var(--dim);'>Veriler çekiliyor...</p>
         </div>
         <button class="savebtn" style="background:var(--s2); margin-top:10px;" onclick="showPg('login')">Ana Menü</button>
     </div>
@@ -108,7 +108,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Şubeler ve giriş şifreleri
         const CLASSES = {
             '5/A': 'maya5A', '5/B': 'maya5B', '6/A': 'maya6A', '6/B': 'maya6B',
             '7/A': 'maya7A', '7/B': 'maya7B', 'ADMIN': 'MayaAdmin2026'
@@ -117,20 +116,19 @@
         let currentClass = "";
         let selectedLogin = "";
 
-        // SIRALAMA - Şube isimleri ve puanları gösterir
+        // SIRALAMA - KRİTİK DÜZELTME
         db.ref('scores').on('value', (snap) => {
             const data = snap.val() || {};
             const list = document.getElementById('rankList');
             
-            // Tüm tanımlı sınıfları listeye dahil et (puanı olmayanlar 0 gözüksün)
-            let scoreArray = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(className => {
-                return {
-                    name: className,
-                    score: typeof data[className] === 'number' ? data[className] : 0
-                };
+            // Tüm sınıfları 0 puanla başlat, veritabanında varsa üzerine yaz
+            let scoreArray = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(cls => {
+                let p = data[cls];
+                // Eğer veri bir object ise içindeki puanı al, değilse direkt sayıyı al
+                let scoreValue = (p && typeof p === 'object') ? (p.score || 0) : (p || 0);
+                return { name: cls, score: Number(scoreValue) };
             });
 
-            // Puanlara göre büyükten küçüğe sırala
             scoreArray.sort((a, b) => b.score - a.score);
             
             list.innerHTML = scoreArray.map((s, i) => `
@@ -139,9 +137,11 @@
                     <span style="color:var(--green); font-weight:800; font-size:18px;">${s.score} Puan</span>
                 </div>
             `).join('');
+        }, (error) => {
+            console.error("Firebase Hatası:", error);
+            document.getElementById('rankList').innerHTML = "<p style='color:red; padding:20px;'>Veri okuma hatası! Lütfen Firebase kurallarını kontrol et.</p>";
         });
 
-        // ADMIN ONAY SİSTEMİ
         db.ref('approvals').on('value', (snap) => {
             const data = snap.val() || {};
             const container = document.getElementById('pendingList');
@@ -207,8 +207,10 @@
         }
 
         function approveItem(id, cls, pts) {
-            db.ref('scores/' + cls).transaction((curr) => (typeof curr === 'number' ? curr : 0) + pts)
-            .then(() => db.ref('approvals/' + id).remove());
+            db.ref('scores/' + cls).transaction((curr) => {
+                let val = (curr && typeof curr === 'object') ? (curr.score || 0) : (curr || 0);
+                return Number(val) + pts;
+            }).then(() => db.ref('approvals/' + id).remove());
         }
 
         function rejectItem(id) { db.ref('approvals/' + id).remove(); }
