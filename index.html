@@ -11,13 +11,13 @@
     <style>
         :root {
             --bg:#0d1117; --surface:#161b22; --s2:#21262d; --border:#30363d;
-            --green:#3fb950; --gdim:#1a4a24; --text:#e6edf3; --dim:#7d8590; --red:#f85149;
+            --green:#3fb950; --text:#e6edf3; --dim:#7d8590; --red:#f85149;
             --sh:0 8px 32px rgba(0,0,0,0.4); --r:12px;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'DM Sans', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
         nav { position:sticky; top:0; z-index:100; background:var(--bg); border-bottom:1px solid var(--border); height:60px; padding:0 20px; display:flex; align-items:center; justify-content:space-between; }
-        .logo { font-family:'Syne',sans-serif; font-weight:900; color:var(--green); font-size:20px; }
+        .logo { font-family:'Syne',sans-serif; font-weight:900; color:var(--green); font-size:20px; text-decoration:none;}
         .nr { display:flex; gap:10px; }
         .nb { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; display:none; }
         .nb.on { display:block; }
@@ -30,7 +30,7 @@
         .fi { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:10px; margin-bottom:10px; outline:none; }
         .savebtn { width:100%; padding:14px; border-radius:10px; border:none; font-weight:800; cursor:pointer; background:var(--green); color:white; }
         .savebtn.red { background:var(--red); margin-top:10px; }
-        .rank-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items:center; }
+        .rank-item { display:flex; justify-content:space-between; padding:18px; border-bottom:1px solid var(--border); align-items:center; }
         .rank-item:last-child { border-bottom: none; }
         .pending-card { background:var(--s2); border:1px solid var(--green); padding:15px; border-radius:10px; margin-bottom:10px; }
         .mover { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
@@ -41,7 +41,7 @@
 <body>
 
     <nav>
-        <div class="logo">♻️ Maya GeriKazanım</div>
+        <a href="#" class="logo" onclick="location.reload()">♻️ Maya GeriKazanım</a>
         <div class="nr">
             <button class="nb" id="btnRank" onclick="showPg('ranking')">🏆 Sıralama</button>
             <button class="nb" id="btnLogout" onclick="logout()" style="color:var(--red)">Çıkış</button>
@@ -81,7 +81,8 @@
     <div class="pg" id="pgRanking">
         <div class="vh">Sınıf Sıralaması</div>
         <div class="card" id="rankList" style="padding:0;">
-            </div>
+            <p style='padding:20px; text-align:center; color:var(--dim);'>Yükleniyor...</p>
+        </div>
         <button class="savebtn" style="background:var(--s2); margin-top:10px;" onclick="showPg('login')">Ana Menü</button>
     </div>
 
@@ -115,23 +116,26 @@
         let currentClass = "";
         let selectedLogin = "";
 
-        // SINIF BAZLI SIRALAMA GÜNCELLEME
+        // SIRALAMA - VERİ OKUMA HATASI BURADA DÜZELTİLDİ
         db.ref('scores').on('value', (snap) => {
             const data = snap.val() || {};
             const list = document.getElementById('rankList');
             
-            // Verileri sınıflara göre sırala (Büyükten küçüğe)
-            const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
+            // Veriyi diziye çevir ve sayısal olarak sırala
+            const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
             
-            if(sorted.length === 0) {
-                list.innerHTML = "<p style='padding:20px; text-align:center; color:var(--dim);'>Henüz puan yok.</p>";
+            if (sorted.length === 0) {
+                list.innerHTML = "<p style='padding:20px; text-align:center; color:var(--dim);'>Henüz puan kaydedilmemiş.</p>";
             } else {
-                list.innerHTML = sorted.map((s, i) => `
+                list.innerHTML = sorted.map((s, i) => {
+                    // Sınıf isminin sonuna "Sınıfı" eklemesi için kontrol
+                    const className = s[0].includes('/') ? s[0] : s[0] + " Sınıfı";
+                    return `
                     <div class="rank-item">
-                        <span><b style="color:var(--dim)">#${i+1}</b> &nbsp; ${s[0]} Sınıfı</span>
+                        <span><b style="color:var(--dim)">#${i+1}</b> &nbsp; ${className}</span>
                         <span style="color:var(--green); font-weight:800; font-size:18px;">${s[1]} Puan</span>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
             }
         });
 
@@ -200,14 +204,14 @@
         }
 
         function approveItem(id, cls, pts) {
-            db.ref('scores/' + cls).transaction((curr) => (curr || 0) + pts)
-            .then(() => db.ref('approvals/' + id).remove());
+            db.ref('scores/' + cls).transaction((curr) => {
+                // Mevcut değer bir nesneyse veya hatalıysa sıfırdan başla, sayıysa üzerine ekle
+                return (typeof curr === 'number' ? curr : 0) + pts;
+            }).then(() => db.ref('approvals/' + id).remove());
         }
 
         function rejectItem(id) { db.ref('approvals/' + id).remove(); }
-
         function resetPoints() { if(confirm("Tüm puanlar silinsin mi?")) db.ref('scores').remove(); }
-
         function logout() { location.reload(); }
 
         buildClasses();
