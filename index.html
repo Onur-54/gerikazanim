@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeriKazanım — Maya Okulları</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDK (v9 Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
         :root {
             --bg:#0d1117; --surface:#161b22; --s2:#21262d; --border:#30363d;
-            --green:#3fb950; --gdim:#1a4a24; --gglow:rgba(63,185,80,0.12);
-            --text:#e6edf3; --dim:#7d8590; --red:#f85149; --yellow:#d29922; --blue:#388bfd;
+            --green:#3fb950; --gdim:#1a4a24; --text:#e6edf3; --dim:#7d8590; --red:#f85149;
             --sh:0 8px 32px rgba(0,0,0,0.4); --r:12px;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -24,26 +21,21 @@
         .nr { display:flex; gap:10px; }
         .nb { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; display:none; }
         .nb.on { display:block; }
-        .nb.red { color: var(--red); border-color: var(--red); }
         .pg { display:none; max-width:600px; margin:40px auto; padding:0 20px; }
-        .pg.on { display:block; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from {opacity:0; transform: translateY(20px)} to {opacity:1; transform: translateY(0)} }
-        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:24px; box-shadow:var(--sh); margin-bottom: 15px; }
-        .vh { font-family:'Syne',sans-serif; font-size:28px; font-weight:900; margin-bottom:8px; text-align:center; }
-        .vs { color:var(--dim); font-size:15px; margin-bottom:24px; text-align:center; }
+        .pg.on { display:block; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:20px; box-shadow:var(--sh); margin-bottom: 15px; }
+        .vh { font-family:'Syne',sans-serif; font-size:24px; font-weight:900; margin-bottom:20px; text-align:center; }
         .cgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px; }
-        .cbtn { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:16px; border-radius:12px; cursor:pointer; font-weight:bold; transition: 0.2s; text-align:center;}
-        .cbtn:hover { border-color:var(--green); background: var(--gglow); }
-        .fi { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:14px; border-radius:10px; margin-bottom:15px; outline:none; font-size:16px;}
-        .savebtn { width:100%; padding:15px; border-radius:12px; border:none; font-family:'Syne',sans-serif; font-weight:800; cursor:pointer; background:var(--green); color:white; transition: 0.2s; }
-        .savebtn:disabled { opacity:0.4; cursor: not-allowed; }
-        .rank-item { display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px solid var(--border); }
+        .cbtn { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:15px; border-radius:12px; cursor:pointer; text-align:center; font-weight:bold; }
+        .fi { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px; border-radius:10px; margin-bottom:10px; outline:none; }
+        .savebtn { width:100%; padding:14px; border-radius:10px; border:none; font-weight:800; cursor:pointer; background:var(--green); color:white; }
+        .savebtn.red { background:var(--red); margin-top:10px; }
+        .rank-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items:center; }
         .rank-item:last-child { border-bottom: none; }
-        .mover { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(4px); }
+        .pending-card { background:var(--s2); border:1px solid var(--green); padding:15px; border-radius:10px; margin-bottom:10px; }
+        .mover { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
         .mover.on { display:flex; }
-        .mbox { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:30px; width:100%; max-width:380px; }
-        .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--s2); border:1px solid var(--green); padding:14px 24px; border-radius:50px; transition:0.4s; opacity:0; z-index:2000; pointer-events: none;}
-        .toast.on { transform:translateX(-50%) translateY(0); opacity:1; }
+        .mbox { background:var(--surface); padding:25px; border-radius:15px; width:100%; max-width:350px; }
     </style>
 </head>
 <body>
@@ -52,77 +44,56 @@
         <div class="logo">♻️ Maya GeriKazanım</div>
         <div class="nr">
             <button class="nb" id="btnRank" onclick="showPg('ranking')">🏆 Sıralama</button>
-            <button class="nb red" id="btnLogout" onclick="logout()">Çıkış</button>
+            <button class="nb" id="btnLogout" onclick="logout()" style="color:var(--red)">Çıkış</button>
         </div>
     </nav>
 
-    <!-- GİRİŞ SAYFASI -->
     <div class="pg on" id="pgLogin">
         <div class="card">
             <div class="vh">Sınıf Seçimi</div>
-            <p class="vs">Devam etmek için sınıfınızı seçin.</p>
             <div class="cgrid" id="cgrid"></div>
-            <button class="cbtn" style="grid-column: 1 / -1; margin-top:15px; border-style:dashed; color:var(--dim); width:100%;" onclick="openPwModal('ADMIN')">⚙️ Yönetici Paneli</button>
+            <button class="cbtn" style="width:100%; margin-top:15px; border-style:dashed; color:var(--dim);" onclick="openPwModal('ADMIN')">⚙️ Yönetici Paneli</button>
         </div>
     </div>
 
-    <!-- ŞİFRE MODALI -->
     <div class="mover" id="pwModal">
         <div class="mbox">
-            <h2 id="pwTitle" style="margin-bottom:10px; font-family:'Syne';">Giriş</h2>
-            <input type="password" class="fi" id="pwIn" placeholder="Şifre" autofocus>
-            <div style="display:flex; gap:10px;">
-                <button class="savebtn" style="background:var(--s2); color:var(--text);" onclick="closePwModal()">İptal</button>
-                <button class="savebtn" onclick="verifyPw()">Giriş Yap</button>
-            </div>
+            <h3 id="pwTitle">Giriş</h3>
+            <input type="password" class="fi" id="pwIn" placeholder="Şifre" style="margin-top:15px;">
+            <button class="savebtn" onclick="verifyPw()">Giriş Yap</button>
+            <button class="savebtn" style="background:none; color:var(--dim);" onclick="closePwModal()">İptal</button>
         </div>
     </div>
 
-    <!-- TARAYICI / KAYIT SAYFASI -->
     <div class="pg" id="pgScanner">
         <div class="vh" id="curClassTitle">Barkod Kaydı</div>
         <div class="card">
-            <input type="text" class="fi" id="bcIn" placeholder="Barkod Numarası" oninput="checkInput()">
-            <button class="savebtn" id="saveBtn" disabled onclick="openPhotoModal()">📷 FOTOĞRAF ÇEK VE GÖNDER</button>
-        </div>
-    </div>
-
-    <!-- SIRALAMA SAYFASI -->
-    <div class="pg" id="pgRanking">
-        <div class="vh">Liderlik Tablosu</div>
-        <div class="card" id="rankList" style="padding:0;"></div>
-        <button class="savebtn" style="margin-top:20px; background:var(--s2); color:var(--text);" onclick="showPg('login')">Ana Menü</button>
-    </div>
-
-    <!-- YÖNETİCİ SAYFASI -->
-    <div class="pg" id="pgAdmin">
-        <div class="vh">Admin Kontrol</div>
-        <div class="card" style="margin-top:20px; border-color:var(--red);">
-            <p style="margin-bottom:15px; color:var(--dim); text-align:center;">Tüm sınıf puanlarını kalıcı olarak siler.</p>
-            <button class="savebtn" style="background:var(--red);" onclick="resetAllPoints()">🛑 TÜM SINIFLARI SIFIRLA</button>
-        </div>
-    </div>
-
-    <!-- FOTOĞRAF MODALI -->
-    <div class="mover" id="photoModal">
-        <div class="mbox">
-            <h3 style="margin-bottom:15px;">Ürün Kanıtı</h3>
-            <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none;" onchange="previewImg(this)">
-            <label for="photoInput" style="display:block; width:100%; padding:30px; border:2px dashed var(--border); border-radius:15px; text-align:center; cursor:pointer;">
-                <span id="labelTxt">📸 Kamerayı Aç</span>
-                <img id="prev" style="display:none; width:100%; border-radius:10px;">
-            </label>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="savebtn" style="background:var(--s2); color:var(--text);" onclick="closeModal()">İptal</button>
-                <button class="savebtn" id="sendBtn" disabled onclick="submitApproval()">Puanı Kaydet</button>
+            <input type="text" class="fi" id="bcIn" placeholder="Barkod Numarası">
+            <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none;" onchange="imageSelected()">
+            <button class="savebtn" onclick="document.getElementById('photoInput').click()">📸 FOTOĞRAF ÇEK</button>
+            <div id="imgPrev" style="margin-top:10px; display:none; text-align:center;">
+                <p style="color:var(--green); font-size:12px; margin-bottom:5px;">✓ Fotoğraf Hazır</p>
+                <button class="savebtn" onclick="submitToApproval()">ONAYA GÖNDER</button>
             </div>
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="pg" id="pgRanking">
+        <div class="vh">Sınıf Sıralaması</div>
+        <div class="card" id="rankList" style="padding:0;">
+            </div>
+        <button class="savebtn" style="background:var(--s2); margin-top:10px;" onclick="showPg('login')">Ana Menü</button>
+    </div>
+
+    <div class="pg" id="pgAdmin">
+        <div class="vh">Onay Bekleyenler</div>
+        <div id="pendingList"></div>
+        <div class="card" style="margin-top:30px; border-color:var(--red);">
+            <button class="savebtn red" onclick="resetPoints()">🛑 TÜM PUANLARI SIFIRLA</button>
+        </div>
+    </div>
 
     <script>
-        // --- SENİN AKTİF FIREBASE BİLGİLERİN ---
         const firebaseConfig = {
             apiKey: "AIzaSyBmkMyRIBgih2b4nHqA0sVOz7j0m54shbc",
             authDomain: "gerikazanim-90377.firebaseapp.com",
@@ -136,66 +107,79 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- OKUL AYARLARI ---
-        const CLASS_CONFIG = {
+        const CLASSES = {
             '5/A': 'maya5A', '5/B': 'maya5B', '6/A': 'maya6A', '6/B': 'maya6B',
             '7/A': 'maya7A', '7/B': 'maya7B', 'ADMIN': 'MayaAdmin2026'
         };
 
-        let scores = {};
         let currentClass = "";
-        let selectedClassForLogin = "";
+        let selectedLogin = "";
 
-        // Veritabanını dinle
+        // SINIF BAZLI SIRALAMA GÜNCELLEME
         db.ref('scores').on('value', (snap) => {
-            scores = snap.val() || {};
-            renderRanking();
+            const data = snap.val() || {};
+            const list = document.getElementById('rankList');
+            
+            // Verileri sınıflara göre sırala (Büyükten küçüğe)
+            const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
+            
+            if(sorted.length === 0) {
+                list.innerHTML = "<p style='padding:20px; text-align:center; color:var(--dim);'>Henüz puan yok.</p>";
+            } else {
+                list.innerHTML = sorted.map((s, i) => `
+                    <div class="rank-item">
+                        <span><b style="color:var(--dim)">#${i+1}</b> &nbsp; ${s[0]} Sınıfı</span>
+                        <span style="color:var(--green); font-weight:800; font-size:18px;">${s[1]} Puan</span>
+                    </div>
+                `).join('');
+            }
         });
 
-        function buildLogin() {
+        // ADMIN ONAY LİSTESİ
+        db.ref('approvals').on('value', (snap) => {
+            const data = snap.val() || {};
+            const container = document.getElementById('pendingList');
+            container.innerHTML = "";
+            const entries = Object.entries(data);
+            if(entries.length === 0) container.innerHTML = "<p style='text-align:center; color:var(--dim);'>Bekleyen onay yok.</p>";
+            
+            entries.forEach(([id, item]) => {
+                const div = document.createElement('div');
+                div.className = 'pending-card';
+                div.innerHTML = `
+                    <p><b>Sınıf:</b> ${item.class}</p>
+                    <p><b>Barkod:</b> ${item.barcode}</p>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="savebtn" onclick="approveItem('${id}', '${item.class}', 5)">Onayla (+5)</button>
+                        <button class="savebtn red" style="margin:0" onclick="rejectItem('${id}')">Reddet</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        });
+
+        function buildClasses() {
             const grid = document.getElementById('cgrid');
-            grid.innerHTML = "";
-            Object.keys(CLASS_CONFIG).forEach(cls => {
-                if(cls === 'ADMIN') return;
-                const btn = document.createElement('div');
-                btn.className = 'cbtn'; btn.innerText = cls;
-                btn.onclick = () => openPwModal(cls);
-                grid.appendChild(btn);
+            Object.keys(CLASSES).forEach(c => {
+                if(c === 'ADMIN') return;
+                const b = document.createElement('div');
+                b.className = 'cbtn'; b.innerText = c;
+                b.onclick = () => openPwModal(c);
+                grid.appendChild(b);
             });
         }
 
-        function openPwModal(cls) {
-            selectedClassForLogin = cls;
-            document.getElementById('pwTitle').innerText = cls + " Girişi";
-            document.getElementById('pwIn').value = "";
-            document.getElementById('pwModal').classList.add('on');
-            setTimeout(() => document.getElementById('pwIn').focus(), 300);
-        }
-
+        function openPwModal(c) { selectedLogin = c; document.getElementById('pwModal').classList.add('on'); }
         function closePwModal() { document.getElementById('pwModal').classList.remove('on'); }
 
         function verifyPw() {
-            const input = document.getElementById('pwIn').value;
-            if(input === CLASS_CONFIG[selectedClassForLogin]) {
+            if(document.getElementById('pwIn').value === CLASSES[selectedLogin]) {
                 closePwModal();
-                if(selectedClassForLogin === 'ADMIN') { showPg('admin'); }
-                else { 
-                    currentClass = selectedClassForLogin; 
-                    showPg('scanner'); 
-                    document.getElementById('curClassTitle').innerText = currentClass; 
-                }
+                if(selectedLogin === 'ADMIN') showPg('admin');
+                else { currentClass = selectedLogin; showPg('scanner'); document.getElementById('curClassTitle').innerText = currentClass + " Kaydı"; }
                 document.getElementById('btnLogout').classList.add('on');
                 document.getElementById('btnRank').classList.add('on');
-            } else { 
-                alert("Hatalı Şifre!"); 
-            }
-        }
-
-        function logout() {
-            currentClass = "";
-            document.getElementById('btnLogout').classList.remove('on');
-            document.getElementById('btnRank').classList.remove('on');
-            showPg('login');
+            } else { alert("Şifre Yanlış!"); }
         }
 
         function showPg(id) {
@@ -203,69 +187,30 @@
             document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on');
         }
 
-        function renderRanking() {
-            const list = document.getElementById('rankList');
-            const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-            if(sorted.length === 0) {
-                list.innerHTML = "<p style='padding:20px; color:var(--dim); text-align:center;'>Henüz puan kaydedilmemiş.</p>";
-                return;
-            }
-            list.innerHTML = sorted.map((s, i) => `
-                <div class="rank-item">
-                    <span><b>${i+1}.</b> ${s[0]}</span>
-                    <span style="color:var(--green); font-weight:800;">${s[1]} Puan</span>
-                </div>
-            `).join('');
-        }
+        function imageSelected() { document.getElementById('imgPrev').style.display = "block"; }
 
-        function checkInput() { 
-            document.getElementById('saveBtn').disabled = document.getElementById('bcIn').value.length < 5; 
-        }
-
-        function openPhotoModal() { document.getElementById('photoModal').classList.add('on'); }
-        function closeModal() { document.getElementById('photoModal').classList.remove('on'); }
-        
-        function previewImg(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('prev').src = e.target.result;
-                    document.getElementById('prev').style.display = "block";
-                    document.getElementById('labelTxt').style.display = "none";
-                    document.getElementById('sendBtn').disabled = false;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function submitApproval() {
-            const newScore = (scores[currentClass] || 0) + 5;
-            db.ref('scores/' + currentClass).set(newScore).then(() => {
-                showToast("5 Puan Eklendi!");
+        function submitToApproval() {
+            const bc = document.getElementById('bcIn').value;
+            if(bc.length < 3) return alert("Lütfen barkod girin!");
+            db.ref('approvals').push({ class: currentClass, barcode: bc }).then(() => {
+                alert("Kayıt yönetici onayına gönderildi!");
                 document.getElementById('bcIn').value = "";
-                document.getElementById('prev').style.display = "none";
-                document.getElementById('labelTxt').style.display = "block";
-                document.getElementById('sendBtn').disabled = true;
-                closeModal();
+                document.getElementById('imgPrev').style.display = "none";
             });
         }
 
-        function resetAllPoints() {
-            if(confirm("DİKKAT: Tüm sınıfların puanları sıfırlanacak. Emin misiniz?")) {
-                db.ref('scores').remove().then(() => {
-                    showToast("Tüm puanlar sıfırlandı!", true);
-                });
-            }
+        function approveItem(id, cls, pts) {
+            db.ref('scores/' + cls).transaction((curr) => (curr || 0) + pts)
+            .then(() => db.ref('approvals/' + id).remove());
         }
 
-        function showToast(msg, red=false) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.style.borderColor = red ? "var(--red)" : "var(--green)";
-            t.classList.add('on'); 
-            setTimeout(() => t.classList.remove('on'), 3000);
-        }
+        function rejectItem(id) { db.ref('approvals/' + id).remove(); }
 
-        buildLogin();
+        function resetPoints() { if(confirm("Tüm puanlar silinsin mi?")) db.ref('scores').remove(); }
+
+        function logout() { location.reload(); }
+
+        buildClasses();
     </script>
 </body>
 </html>
