@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeriKazanım — Maya Okulları</title>
+    <title>Geri-Kazanım — Maya Okulları</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -11,7 +11,8 @@
         body { font-family: sans-serif; background:var(--bg); color:var(--text); text-align:center; padding:20px; margin:0; }
         .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:500px; margin:20px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .rank-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items:center; }
-        .btn { background:var(--green); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; margin-top:10px; font-weight:bold; }
+        .btn { background:var(--green); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; margin-top:10px; font-weight:bold; transition: 0.2s; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         input { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid var(--border); background:#0d1117; color:white; box-sizing: border-box; }
         .pg { display:none; } .on { display:block; }
         .class-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
@@ -21,7 +22,7 @@
 </head>
 <body>
 
-    <h2 style="color:var(--green);">♻️ Maya GeriKazanım</h2>
+    <h2 style="color:var(--green);">♻️ Maya Geri-Kazanım</h2>
 
     <div id="pgLogin" class="pg on">
         <div class="card">
@@ -52,15 +53,15 @@
     <div id="pgScan" class="pg">
         <div class="card">
             <h3 id="scanTitle">Kayıt</h3>
-            <input type="text" id="bcIn" placeholder="Barkod No">
+            <input type="text" id="bcIn" placeholder="Barkod Numarasını Yazın">
             
-            <p style="font-size: 13px; color: #7d8590;">Kanıt için fotoğraf çekmelisin:</p>
+            <p style="font-size: 13px; color: #7d8590; margin-top: 10px;">Kanıt için fotoğraf çekin:</p>
             <input type="file" id="fileIn" accept="image/*" capture="environment" style="display:none;" onchange="handleFile(this)">
-            <button class="btn" style="background:#21262d;" onclick="document.getElementById('fileIn').click()">📸 FOTOĞRAF ÇEK</button>
+            <button class="btn" style="background:#21262d;" onclick="document.getElementById('fileIn').click()">📸 FOTOĞRAF ÇEK / SEÇ</button>
             <img id="preview" class="img-preview">
 
-            <button class="btn" id="sendBtn" onclick="sendToAdmin()" style="margin-top:20px; opacity:0.5;" disabled>ONAYA GÖNDER</button>
-            <button class="btn" style="background:var(--red);" onclick="showPg('login')">Çıkış</button>
+            <button class="btn" id="sendBtn" onclick="sendToAdmin()" style="margin-top:20px;" disabled>ONAYA GÖNDER</button>
+            <button class="btn" style="background:var(--red);" onclick="showPg('login')">İptal Et</button>
         </div>
     </div>
 
@@ -93,28 +94,28 @@
         // Fotoğraf İşleme
         function handleFile(input) {
             const file = input.files[0];
+            if(!file) return;
             const reader = new FileReader();
             reader.onloadend = function() {
                 base64Image = reader.result;
                 const img = document.getElementById('preview');
                 img.src = base64Image;
                 img.style.display = "block";
-                document.getElementById('sendBtn').style.opacity = "1";
                 document.getElementById('sendBtn').disabled = false;
             }
-            if(file) reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
         }
 
-        // Sıralama
+        // Sıralama Takibi
         db.ref('scores').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('rankList');
             let arr = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(c => ({name: c, score: Number(data[c] || 0)}));
             arr.sort((a,b) => b.score - a.score);
-            list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name}</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
+            list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name} Şubesi</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
         });
 
-        // Admin Listesi
+        // Admin Paneli
         db.ref('approvals').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('adminList');
@@ -124,7 +125,7 @@
             list.innerHTML = entries.map(([id, item]) => `
                 <div style="padding:15px; border:1px solid var(--border); border-radius:8px; margin-bottom:10px; background:#0d1117; text-align:left;">
                     <p><b>Sınıf:</b> ${item.cls} | <b>BC:</b> ${item.bc}</p>
-                    <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ FOTOĞRAFI GÖR/KAPAT</button>
+                    <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ FOTOĞRAFI GÖR</button>
                     <img id="img-${id}" src="${item.img}" class="admin-img" onclick="window.open(this.src)">
                     <button class="btn" onclick="approve('${id}', '${item.cls}')">Onayla (+5)</button>
                 </div>`).join('');
@@ -136,23 +137,36 @@
         }
 
         function checkPw() {
-            if(document.getElementById('pwIn').value === CLASSES[selected]) {
+            const val = document.getElementById('pwIn').value;
+            if(val === CLASSES[selected]) {
                 if(selected === 'ADMIN') showPg('admin');
                 else { currentClass = selected; showPg('scan'); document.getElementById('scanTitle').innerText = currentClass + " Kaydı"; }
                 document.getElementById('pwIn').value = "";
             } else { alert("Hatalı Şifre!"); }
         }
 
+        // GÜVENLİ GÖNDERİM FONKSİYONU
         function sendToAdmin() {
-            const bc = document.getElementById('bcIn').value;
-            if(!bc || !base64Image) return alert("Barkod ve Fotoğraf zorunlu!");
-            db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
-                alert("Onaya gönderildi!");
+            const bc = document.getElementById('bcIn').value.trim();
+            const img = base64Image;
+
+            if (!bc) {
+                alert("Hata: Lütfen barkod numarasını yazın!");
+                return;
+            }
+            if (!img) {
+                alert("Hata: Lütfen kanıt fotoğrafı çekin!");
+                return;
+            }
+
+            db.ref('approvals').push({ cls: currentClass, bc: bc, img: img }).then(() => {
+                alert("Başarılı! Kayıt onaya gönderildi.");
                 document.getElementById('bcIn').value = "";
                 document.getElementById('preview').style.display = "none";
                 base64Image = "";
+                document.getElementById('sendBtn').disabled = true;
                 showPg('login');
-            });
+            }).catch(e => alert("Sistem hatası: " + e.message));
         }
 
         function approve(id, cls) {
