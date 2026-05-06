@@ -1,1166 +1,299 @@
 <!DOCTYPE html>
 <html lang="tr" data-theme="dark">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GeriKazanım — Maya Okulları</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-:root{
-  --bg:#0d1117;--surface:#161b22;--s2:#21262d;--border:#30363d;
-  --green:#3fb950;--gdim:#1a4a24;--gglow:rgba(63,185,80,0.12);
-  --text:#e6edf3;--dim:#7d8590;--red:#f85149;--yellow:#d29922;--blue:#388bfd;
-  --r:12px;--sh:0 8px 32px rgba(0,0,0,0.4);
-}
-[data-theme="light"]{
-  --bg:#f6f8fa;--surface:#fff;--s2:#f0f2f5;--border:#d0d7de;
-  --green:#1a7f37;--gdim:#d3f8d8;--gglow:rgba(26,127,55,0.1);
-  --text:#1f2328;--dim:#656d76;--red:#cf222e;--yellow:#9a6700;--blue:#0969da;
-  --sh:0 4px 16px rgba(0,0,0,0.08);
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeriKazanım — Maya Okulları</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:#0d1117; --surface:#161b22; --s2:#21262d; --border:#30363d;
+            --green:#3fb950; --gdim:#1a4a24; --gglow:rgba(63,185,80,0.12);
+            --text:#e6edf3; --dim:#7d8590; --red:#f85149; --yellow:#d29922; --blue:#388bfd;
+            --sh:0 8px 32px rgba(0,0,0,0.4); --r:12px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-/* NAV */
-nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);height:58px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;}
-.logo{font-family:'Syne',sans-serif;font-weight:900;font-size:16px;color:var(--green);display:flex;align-items:center;gap:7px;cursor:pointer;}
-.dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:bl 2s infinite;}
-@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
-.nr{display:flex;align-items:center;gap:6px;}
-.nb{background:none;border:1px solid var(--border);color:var(--dim);padding:5px 11px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;transition:all .2s;}
-.nb.on{display:inline-flex;align-items:center;gap:3px;}
-.nb:hover,.nb.act{border-color:var(--green);color:var(--green);background:var(--gglow);}
-.nb.red{border-color:var(--red) !important;color:var(--red) !important;}
-.tb{background:none;border:1px solid var(--border);color:var(--dim);width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
-.tb:hover{border-color:var(--green);color:var(--green);}
-.cbadge{background:var(--gglow);border:1px solid var(--gdim);color:var(--green);font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;display:none;align-items:center;}
-.cbadge.on{display:flex;}
+        nav { position:sticky; top:0; z-index:100; background:var(--bg); border-bottom:1px solid var(--border); height:60px; padding:0 20px; display:flex; align-items:center; justify-content:space-between; }
+        .logo { font-family:'Syne',sans-serif; font-weight:900; color:var(--green); font-size:20px; }
+        .nr { display:flex; gap:10px; }
+        .nb { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; display:none; }
+        .nb.on { display:block; }
+        .nb.red { color: var(--red); border-color: var(--red); }
 
-/* VIEWS */
-.pg{display:none;}.pg.on{display:block;}
-main{max-width:1060px;margin:0 auto;padding:24px 16px 80px;}
+        .pg { display:none; max-width:600px; margin:40px auto; padding:0 20px; }
+        .pg.on { display:block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from {opacity:0; transform: translateY(20px)} to {opacity:1; transform: translateY(0)} }
 
-/* LOGIN */
-.lwrap{min-height:calc(100vh - 58px);display:flex;align-items:center;justify-content:center;padding:24px 16px;}
-.lcard{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px;width:100%;max-width:500px;text-align:center;box-shadow:var(--sh);}
-.licon{font-size:42px;margin-bottom:10px;}
-.ltitle{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;margin-bottom:5px;}
-.lsub{color:var(--dim);font-size:13px;margin-bottom:22px;line-height:1.6;}
-.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(75px,1fr));gap:7px;margin-bottom:16px;}
-.cbtn{background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:11px 5px;border-radius:9px;cursor:pointer;transition:all .2s;}
-.cbtn:hover{border-color:var(--green);color:var(--green);background:var(--gglow);}
-.lor{color:var(--dim);font-size:12px;margin:12px 0;position:relative;}
-.lor::before,.lor::after{content:'';position:absolute;top:50%;width:44%;height:1px;background:var(--border);}
-.lor::before{left:0;}.lor::after{right:0;}
-.qrbtn{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:12px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:8px;transition:all .2s;}
-.qrbtn:hover{border-color:var(--green);color:var(--green);background:var(--gglow);}
-.alink{color:var(--dim);font-size:11px;cursor:pointer;margin-top:8px;display:inline-block;}
-.alink:hover{color:var(--text);}
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:24px; box-shadow:var(--sh); margin-bottom: 15px; }
+        .vh { font-family:'Syne',sans-serif; font-size:28px; font-weight:900; margin-bottom:8px; text-align:center; }
+        .vs { color:var(--dim); font-size:15px; margin-bottom:24px; text-align:center; }
 
-/* MODAL */
-.mover{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
-.mover.on{display:flex;}
-.mbox{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px;width:100%;max-width:340px;box-shadow:var(--sh);}
-.mtitle{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:3px;}
-.msub{color:var(--dim);font-size:12px;margin-bottom:16px;}
-.minput{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px;padding:11px 13px;border-radius:8px;outline:none;font-family:'DM Sans',sans-serif;margin-bottom:8px;}
-.minput:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gglow);}
-.merr{color:var(--red);font-size:12px;margin-bottom:8px;display:none;}
-.merr.on{display:block;}
-.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-.mcancel{background:var(--s2);border:1px solid var(--border);color:var(--dim);font-size:13px;padding:10px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.mok{background:var(--green);border:none;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:10px;border-radius:8px;cursor:pointer;}
-.mok:hover{opacity:.88;}
+        .cgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px; }
+        .cbtn { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:16px; border-radius:12px; cursor:pointer; font-weight:bold; transition: 0.2s; }
+        .cbtn:hover { border-color:var(--green); background: var(--gglow); }
+        .admin-btn { grid-column: 1 / -1; margin-top: 15px; background:transparent; border-style: dashed; color: var(--dim); }
 
-/* CAMERA */
-.cover{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
-.cover.on{display:flex;}
-.cbox{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;width:100%;max-width:400px;text-align:center;}
-.ctitle{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:3px;}
-.csub{color:var(--dim);font-size:12px;margin-bottom:12px;}
-.cframe{position:relative;border-radius:10px;overflow:hidden;background:#000;margin-bottom:10px;}
-#camVid{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;}
-.cline{position:absolute;left:0;right:0;height:2px;background:var(--green);box-shadow:0 0 8px var(--green);animation:scan 2s ease-in-out infinite;}
-@keyframes scan{0%{top:8%}50%{top:88%}100%{top:8%}}
-.cst{font-size:13px;color:var(--dim);margin-bottom:10px;min-height:18px;}
-.cst.ok{color:var(--green);font-weight:600;}.cst.err{color:var(--red);}
-.cclose{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--dim);font-size:13px;padding:10px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.cclose:hover{border-color:var(--red);color:var(--red);}
+        .fi { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:14px; border-radius:10px; margin-bottom:15px; outline:none; }
+        .savebtn { width:100%; padding:15px; border-radius:12px; border:none; font-family:'Syne',sans-serif; font-weight:800; cursor:pointer; background:var(--green); color:white; transition: 0.2s; }
+        .savebtn:disabled { opacity:0.4; }
 
-/* SCANNER PAGE */
-.sl{display:grid;grid-template-columns:1fr 290px;gap:16px;align-items:start;}
-@media(max-width:740px){.sl{grid-template-columns:1fr;}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh);}
-.fl{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;}
-.fg{margin-bottom:13px;}
-.frow{display:flex;gap:7px;}
-.fi{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:17px;padding:11px 13px;border-radius:8px;outline:none;font-family:monospace;letter-spacing:2px;transition:border-color .2s;}
-.fi:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--gglow);}
-.fi::placeholder{font-family:'DM Sans',sans-serif;font-size:13px;letter-spacing:0;}
-.sbtn{background:var(--blue);border:none;color:#fff;padding:0 15px;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;}
-.sbtn:hover{opacity:.85;}
-.cambtn{width:100%;background:var(--s2);border:2px dashed var(--gdim);color:var(--green);font-size:13px;font-weight:600;padding:12px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:14px;font-family:'DM Sans',sans-serif;transition:all .2s;}
-.cambtn:hover{background:var(--gglow);border-color:var(--green);}
+        /* Sıralama ve Yönetim Listesi */
+        .rank-item { display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px solid var(--border); }
+        .rank-item:last-child { border-bottom: none; }
+        .reset-mini { background: rgba(248,81,73,0.1); border: 1px solid var(--red); color: var(--red); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .reset-mini:hover { background: var(--red); color: white; }
 
-/* LOOKUP */
-.lbox{border-radius:10px;padding:14px;margin-bottom:13px;display:none;}
-.lbox.load{display:flex;align-items:center;gap:9px;border:1px solid var(--border);background:var(--s2);color:var(--dim);font-size:13px;}
-.lbox.found{display:flex;align-items:center;gap:12px;border:1px solid var(--green);background:var(--gglow);}
-.lbox.nf{display:block;border:1px solid var(--yellow);background:rgba(210,153,34,.07);}
-.lbox.er{display:block;border:1px solid var(--border);background:var(--s2);}
-.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0;}
-@keyframes sp{to{transform:rotate(360deg)}}
-.lname{font-size:14px;font-weight:700;}
-.lbrand{font-size:11px;color:var(--dim);margin-top:1px;}
-.lpts{font-family:'Syne',sans-serif;font-size:26px;font-weight:900;color:var(--green);margin-left:auto;line-height:1;}
-.lptsl{font-size:10px;color:var(--dim);text-align:right;}
-.nft{font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:3px;}
-.nfs{font-size:12px;color:var(--dim);}
+        .mover { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(4px); }
+        .mover.on { display:flex; }
+        .mbox { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:30px; width:100%; max-width:380px; }
 
-.warn{background:rgba(248,81,73,.08);border:1px solid var(--red);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--red);margin-bottom:11px;display:none;}
-.warn.on{display:block;}
-.savebtn{width:100%;background:var(--green);color:#fff;border:none;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;padding:14px;border-radius:10px;cursor:pointer;transition:all .2s;letter-spacing:.3px;}
-.savebtn:hover:not(:disabled){opacity:.88;transform:translateY(-1px);}
-.savebtn:disabled{opacity:.28;cursor:not-allowed;transform:none;}
-
-/* SIDEBAR */
-.stitle{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
-.bign{font-family:'Syne',sans-serif;font-size:52px;font-weight:900;color:var(--green);line-height:1;}
-.bigl{font-size:11px;color:var(--dim);margin-top:3px;}
-.badd{display:inline-block;background:var(--gglow);border:1px solid var(--gdim);color:var(--green);font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;margin-top:6px;opacity:0;transition:opacity .3s;}
-.badd.on{opacity:1;}
-.txi{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);}
-.txi:last-child{border-bottom:none;}
-.txic{width:33px;height:33px;background:var(--s2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.txn{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.txs{font-size:11px;color:var(--dim);margin-top:1px;}
-.txp{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green);}
-
-/* LB */
-.lbh{background:linear-gradient(135deg,var(--gdim),var(--s2));border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
-.lbt{font-family:'Syne',sans-serif;font-size:20px;font-weight:900;}
-.lbs{color:var(--dim);font-size:12px;margin-top:2px;}
-.lbg{display:grid;gap:7px;}
-.lbr{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 16px;display:flex;align-items:center;gap:11px;transition:all .2s;}
-.lbr:hover{border-color:var(--green);transform:translateX(3px);}
-.lbr.r1{border-color:#ffd700;background:linear-gradient(90deg,rgba(255,215,0,.06),var(--surface));}
-.lbr.r2{border-color:#c0c0c0;background:linear-gradient(90deg,rgba(192,192,192,.06),var(--surface));}
-.lbr.r3{border-color:#cd7f32;background:linear-gradient(90deg,rgba(205,127,50,.06),var(--surface));}
-.lbrank{font-family:'Syne',sans-serif;font-size:19px;font-weight:900;width:28px;text-align:center;}
-.r1 .lbrank{color:#ffd700;}.r2 .lbrank{color:#c0c0c0;}.r3 .lbrank{color:#cd7f32;}
-.lbcn{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;flex:1;}
-.lbct{font-size:11px;color:var(--dim);margin-top:1px;}
-.lbp{font-family:'Syne',sans-serif;font-size:19px;font-weight:900;color:var(--green);}
-.lbp span{font-size:10px;font-weight:400;color:var(--dim);}
-.lbbw{width:100%;background:var(--s2);border-radius:99px;height:3px;margin-top:4px;}
-.lbb{height:3px;background:var(--green);border-radius:99px;transition:width 1s;}
-
-/* PROFILE */
-.ph{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.pav{width:56px;height:56px;background:var(--green);border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:900;color:#fff;text-align:center;flex-shrink:0;}
-.pn{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;}
-.pe{color:var(--dim);font-size:12px;margin-top:2px;}
-.pbg{margin-left:auto;background:var(--gglow);border:1px solid var(--gdim);color:var(--green);font-size:11px;font-weight:600;padding:4px 11px;border-radius:7px;}
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px;}
-.sb{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;}
-.sn{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;color:var(--green);}
-.sl2{font-size:11px;color:var(--dim);margin-top:2px;}
-.ht{width:100%;border-collapse:collapse;}
-.ht th{text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim);padding:8px 0;border-bottom:1px solid var(--border);}
-.ht td{padding:10px 0;font-size:12px;border-bottom:1px solid var(--border);}
-.ht tr:last-child td{border-bottom:none;}
-.tg{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--green);}
-.tc{font-family:monospace;font-size:11px;color:var(--dim);}
-
-/* ADMIN */
-.adh{background:linear-gradient(135deg,rgba(248,81,73,.1),var(--s2));border:1px solid var(--red);border-radius:var(--r);padding:20px;margin-bottom:18px;display:flex;align-items:center;gap:12px;}
-.adt{font-family:'Syne',sans-serif;font-size:19px;font-weight:900;}
-.ads{color:var(--dim);font-size:12px;margin-top:2px;}
-.adg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
-@media(max-width:600px){.adg{grid-template-columns:1fr;}.sg{grid-template-columns:1fr;}}
-.adst{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;}
-.adsn{font-family:'Syne',sans-serif;font-size:26px;font-weight:900;color:var(--green);}
-.adsl{font-size:11px;color:var(--dim);margin-top:2px;}
-.adac{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
-.adbn{padding:9px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:1px solid;}
-.adr{background:rgba(248,81,73,.1);border-color:var(--red);color:var(--red);}
-.ady{background:rgba(210,153,34,.1);border-color:var(--yellow);color:var(--yellow);}
-.adgr{background:var(--gglow);border-color:var(--green);color:var(--green);}
-.lkbanner{background:rgba(248,81,73,.08);border:1px solid var(--red);border-radius:9px;padding:10px 14px;font-size:12px;color:var(--red);font-weight:600;margin-bottom:14px;display:none;align-items:center;gap:7px;}
-.lkbanner.on{display:flex;}
-.adc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 16px;margin-bottom:8px;}
-.adch{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
-.adcn{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;flex:1;}
-.adcp{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--green);}
-.adcr{background:rgba(248,81,73,.1);border:1px solid var(--red);color:var(--red);font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.adlog{background:var(--bg);border-radius:7px;padding:10px;max-height:180px;overflow-y:auto;font-family:monospace;font-size:10px;color:var(--dim);}
-.adle{padding:2px 0;border-bottom:1px solid var(--border);}
-.adle:last-child{border-bottom:none;}
-.qrg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-top:12px;}
-.qrc{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:14px;text-align:center;}
-.qrct{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;margin-bottom:8px;}
-.qrw{display:flex;justify-content:center;margin-bottom:7px;}
-
-/* PENDING APPROVAL */
-.pend-box{border:1px solid var(--yellow);background:rgba(210,153,34,.08);border-radius:10px;padding:14px;margin-bottom:13px;display:none;}
-.pend-box.on{display:block;}
-.pend-title{font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:3px;}
-.pend-sub{font-size:12px;color:var(--dim);}
-.pend-item{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:8px;}
-.pend-item:last-child{margin-bottom:0;}
-.pend-item-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.pend-cls{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;background:var(--gglow);border:1px solid var(--gdim);color:var(--green);padding:2px 8px;border-radius:99px;}
-.pend-bc{font-family:monospace;font-size:12px;color:var(--dim);flex:1;}
-.pend-date{font-size:11px;color:var(--dim);}
-.pend-btns{display:flex;gap:7px;}
-.pend-approve{background:var(--green);border:none;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:7px 14px;border-radius:7px;cursor:pointer;flex:1;}
-.pend-approve:hover{opacity:.88;}
-.pend-reject{background:rgba(248,81,73,.1);border:1px solid var(--red);color:var(--red);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer;flex:1;}
-.pend-reject:hover{background:rgba(248,81,73,.2);}
-.pend-badge{background:rgba(210,153,34,.15);border:1px solid var(--yellow);color:var(--yellow);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap;}
-.approved-badge{background:var(--gglow);border:1px solid var(--gdim);color:var(--green);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;}
-.pending-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);}
-.pending-item:last-child{border-bottom:none;}
-.pending-info{flex:1;}
-.pending-bc{font-family:monospace;font-size:12px;color:var(--dim);}
-.pending-name{font-size:13px;font-weight:600;margin-top:2px;}
-.pending-cls{font-size:11px;color:var(--yellow);margin-top:1px;}
-.btn-approve{background:rgba(63,185,80,0.1);border:1px solid var(--green);color:var(--green);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-left:4px;}
-.btn-approve:hover{background:rgba(63,185,80,0.2);}
-.btn-reject{background:rgba(248,81,73,0.1);border:1px solid var(--red);color:var(--red);font-size:11px;font-weight:700;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.btn-reject:hover{background:rgba(248,81,73,0.2);}
-.toast{position:fixed;bottom:16px;right:16px;background:var(--surface);border:1px solid var(--green);border-radius:12px;padding:12px 15px;display:flex;align-items:center;gap:10px;min-width:220px;z-index:999;transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);box-shadow:var(--sh);}
-.toast.on{transform:translateY(0);opacity:1;}
-.tosti{width:32px;height:32px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;flex-shrink:0;}
-.tostt{font-size:13px;font-weight:700;}.tosts{font-size:11px;color:var(--dim);margin-top:1px;}
-
-/* LOCKED */
-.locked{position:fixed;inset:0;background:var(--bg);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;}
-.locked.on{display:flex;}
-
-.empty{text-align:center;padding:22px 0;color:var(--dim);font-size:13px;}
-.vh{font-family:'Syne',sans-serif;font-size:20px;font-weight:900;margin-bottom:3px;}
-.vs{color:var(--dim);font-size:12px;margin-bottom:18px;}
-footer{border-top:1px solid var(--border);padding:16px;text-align:center;font-size:11px;color:var(--dim);line-height:1.8;}
-footer strong{color:var(--text);}
-</style>
+        .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--s2); border:1px solid var(--green); padding:14px 24px; border-radius:50px; transition:0.4s; opacity:0; z-index:2000; }
+        .toast.on { transform:translateX(-50%) translateY(0); opacity:1; }
+    </style>
 </head>
 <body>
 
-<input type="hidden" id="hiddenCls" value=""/>
-
-<!-- LOCKED -->
-<div class="locked" id="lkScreen">
-  <div style="font-size:56px;margin-bottom:16px;">🔒</div>
-  <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:900;color:var(--red);margin-bottom:8px;">Site Kilitlendi</div>
-  <div style="color:var(--dim);font-size:14px;max-width:340px;line-height:1.6;">Bu site şu an yönetici tarafından kilitlenmiştir.</div>
-  <div style="margin-top:28px;"><span class="alink" onclick="openAdminPw()" style="opacity:.2;">⚙</span></div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <div class="tosti" id="tosti">✓</div>
-  <div><div class="tostt" id="tostt"></div><div class="tosts" id="tosts"></div></div>
-</div>
-
-<!-- PW MODAL -->
-<div class="mover" id="pwModal">
-  <div class="mbox">
-    <div class="mtitle" id="pwTitle">🔐 Giriş</div>
-    <div class="msub" id="pwSub">Şifrenizi girin</div>
-    <input type="password" class="minput" id="pwIn" placeholder="Şifre" onkeydown="if(event.key==='Enter')confirmPw()"/>
-    <div class="merr" id="pwErr">❌ Hatalı şifre.</div>
-    <div class="mbtns">
-      <button class="mcancel" onclick="closePwModal()">İptal</button>
-      <button class="mok" onclick="confirmPw()">Giriş</button>
-    </div>
-  </div>
-</div>
-
-<!-- PHOTO MODAL -->
-<div class="mover" id="photoModal">
-  <div class="mbox" style="max-width:400px;">
-    <div class="mtitle" id="photoModalTitle">📷 Fotoğraf Gerekli</div>
-    <div class="msub" id="photoModalSub">Ürünün fotoğrafını çekerek gönderin.</div>
-    <label style="display:block;background:var(--s2);border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;margin-bottom:12px;transition:all .2s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
-      <div style="font-size:32px;margin-bottom:6px;">📸</div>
-      <div style="font-size:13px;color:var(--dim);">Fotoğraf çek veya galeriden seç</div>
-      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSelected(this)"/>
-    </label>
-    <img id="photoPreview" style="display:none;width:100%;border-radius:10px;margin-bottom:12px;max-height:200px;object-fit:cover;"/>
-    <div class="mbtns">
-      <button class="mcancel" onclick="closePhotoModal()">İptal</button>
-      <button class="mok" id="photoSendBtn" disabled onclick="sendPhotoApproval()">📨 Gönder</button>
-    </div>
-  </div>
-</div>
-
-<!-- CAMERA -->
-<div class="cover" id="camModal">
-  <div class="cbox">
-    <div class="ctitle" id="camTitle">📷 Barkod Tara</div>
-    <div class="csub" id="camSub">Ürünün barkodunu kameraya göster</div>
-    <div class="cframe"><video id="camVid" playsinline autoplay muted></video><div class="cline"></div></div>
-    <div class="cst" id="camSt">Kamera başlatılıyor...</div>
-    <button class="cclose" onclick="closeCamera()">✕ Kapat</button>
-  </div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <div class="logo" onclick="goHome()"><div class="dot"></div>GeriKazanım</div>
-  <div class="nr">
-    <div class="cbadge" id="cbadge">📚 <span id="cbadgeTxt"></span></div>
-    <button class="nb" id="nScan" onclick="goTo('scanner')">Barkod</button>
-    <button class="nb" id="nLb" onclick="goTo('lb')">Sıralama</button>
-    <button class="nb" id="nProf" onclick="goTo('profile')">Profilim</button>
-    <button class="nb" id="nOut">Çıkış</button>
-    <button class="nb red" id="nAdmin" onclick="goTo('admin')">⚙ Admin</button>
-    <button class="tb" onclick="toggleTheme()">🌙</button>
-  </div>
-</nav>
-
-<!-- LOGIN -->
-<div class="pg on" id="pgLogin">
-  <div class="lwrap">
-    <div class="lcard">
-      <div class="licon">♻️</div>
-      <div class="ltitle">GeriKazanım</div>
-      <div class="lsub">Maya Okulları Geri Dönüşüm Sistemi<br>Sınıfını seç veya QR kodunu okut</div>
-      <div class="cgrid" id="cgrid"></div>
-      <div class="lor">veya</div>
-      <button class="qrbtn" onclick="openCam(true)">📷 QR Kod ile Giriş Yap</button>
-      <div><span class="alink" onclick="openAdminPw()">⚙ Yönetici Girişi</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- SCANNER -->
-<div class="pg" id="pgScanner">
-  <main>
-    <div class="vh">Barkod Gir</div>
-    <div class="vs">Her ürün 5 puan — barkodu tara veya yaz, sonra Ara'ya bas</div>
-    <div class="sl">
-      <div class="card">
-        <button class="cambtn" onclick="openCam(false)">📷 Kamerayla Tara</button>
-        <div class="fg">
-          <label class="fl">Barkod Numarası</label>
-          <div class="frow">
-            <input type="text" class="fi" id="bcIn"
-              placeholder="8690000000000"
-              maxlength="13"
-              inputmode="numeric"
-              oninput="onBcType(this)"
-              onkeydown="if(event.key==='Enter')doSearch()"/>
-            <button class="sbtn" onclick="doSearch()">Ara 🔍</button>
-          </div>
+    <nav>
+        <div class="logo">♻️ Maya GeriKazanım</div>
+        <div class="nr">
+            <button class="nb" id="btnRank" onclick="showPg('ranking')">🏆 Sıralama</button>
+            <button class="nb red" id="btnLogout" onclick="logout()">Çıkış</button>
         </div>
-        <div class="lbox" id="lbox"></div>
-        <div class="warn" id="warnBox"></div>
-        <button class="savebtn" id="saveBtn" disabled onclick="doSave()">✓ 5 PUAN KAYDET</button>
-      </div>
-      <div>
-        <div class="card" style="margin-bottom:12px;text-align:center;">
-          <div class="stitle"><span id="curClassName"></span> Puanı</div>
-          <div class="bign" id="sidePts">0</div>
-          <div class="bigl">Toplam Puan</div>
-          <div class="badd" id="badd">+5 puan eklendi ✓</div>
-        </div>
+    </nav>
+
+    <!-- GİRİŞ SAYFASI -->
+    <div class="pg on" id="pgLogin">
         <div class="card">
-          <div class="stitle">Son Eklenenler</div>
-          <div id="txList"><div class="empty">Henüz kayıt yok</div></div>
+            <div class="vh">Sınıf Seçimi</div>
+            <p class="vs">Devam etmek için sınıfınızı seçin.</p>
+            <div class="cgrid" id="cgrid"></div>
+            <button class="cbtn admin-btn" onclick="openPwModal('ADMIN')">⚙️ Yönetici Paneli</button>
         </div>
-      </div>
-    </div>
-  </main>
-</div>
-
-<!-- LEADERBOARD -->
-<div class="pg" id="pgLb">
-  <main>
-    <div class="lbh"><div style="font-size:40px;">🏆</div><div><div class="lbt">Sınıf Sıralaması</div><div class="lbs">En çok geri dönüşüm yapan sınıflar</div></div></div>
-    <div class="lbg" id="lbGrid"></div>
-  </main>
-</div>
-
-<!-- PROFILE -->
-<div class="pg" id="pgProfile">
-  <main>
-    <div class="ph">
-      <div class="pav" id="pAv"></div>
-      <div><div class="pn" id="pName"></div><div class="pe">Maya Okulları · Geri Dönüşüm</div></div>
-      <div class="pbg" id="pBadge"></div>
-    </div>
-    <div class="sg">
-      <div class="sb"><div class="sn" id="pTotalC">0</div><div class="sl2">Taranan Ürün</div></div>
-      <div class="sb"><div class="sn" id="pTotalP">0</div><div class="sl2">Toplam Puan</div></div>
-    </div>
-    <div class="card">
-      <div class="stitle" style="margin-bottom:12px;">Kayıt Geçmişi</div>
-      <table class="ht">
-        <thead><tr><th>Barkod</th><th>Ürün</th><th>Puan</th><th>Tarih</th></tr></thead>
-        <tbody id="histBody"></tbody>
-      </table>
-    </div>
-  </main>
-</div>
-
-<!-- ADMIN -->
-<div class="pg" id="pgAdmin">
-  <main>
-    <div class="adh"><div style="font-size:32px;">⚙️</div><div><div class="adt">Yönetici Paneli</div><div class="ads">Tüm sınıf verilerini yönet</div></div></div>
-    <div class="lkbanner" id="lkBanner">🔒 Site şu an kilitli.</div>
-    <div class="adg">
-      <div class="adst"><div class="adsn" id="adTotC">0</div><div class="adsl">Toplam Kayıt</div></div>
-      <div class="adst"><div class="adsn" id="adTotP">0</div><div class="adsl">Toplam Puan</div></div>
-    </div>
-    <div class="adac">
-      <button class="adbn adr" onclick="adResetAll()">🗑 Tümünü Sıfırla</button>
-      <button class="adbn ady" id="lkBtn" onclick="toggleLock()">🔒 Siteyi Kilitle</button>
-      <button class="adbn adgr" onclick="adLogout()">← Çıkış</button>
     </div>
 
-    <!-- PENDING APPROVALS -->
-    <div class="card" style="margin-bottom:14px;border-color:var(--yellow);" id="pendingSection">
-      <div class="stitle" style="color:var(--yellow);margin-bottom:10px;">⏳ Onay Bekleyen Ürünler <span id="pendingCount" style="background:var(--yellow);color:#000;font-size:10px;font-weight:800;padding:1px 7px;border-radius:99px;margin-left:4px;">0</span></div>
-      <div id="pendingList"><div class="empty">Onay bekleyen ürün yok</div></div>
-    </div>
-
-    <div id="adClassGrid"></div>
-    <div class="card" style="margin-top:14px;">
-      <div class="stitle" style="margin-bottom:8px;">İşlem Günlüğü</div>
-      <div class="adlog" id="adLog"><div class="empty">Henüz işlem yok</div></div>
-    </div>
-    <div class="card" style="margin-top:14px;">
-      <div class="stitle">Sınıf QR Kodları</div>
-      <div style="font-size:12px;color:var(--dim);margin:6px 0 2px;">Yazdırıp çöp kutularına yapıştırın.</div>
-      <div class="qrg" id="qrGrid"></div>
-    </div>
-  </main>
-</div>
-
-<footer>
-  Bu Web Sitesi <strong>Maya Okulları</strong> İçin
-  <strong>Onur BOZOK</strong>, <strong>Göktürk ŞİMŞEK</strong>,
-  <strong>Yiğit ÇETİN</strong> ve <strong>Ozan ŞENTEKİN</strong> Tarafından Geliştirilmiştir.
-</footer>
-
-<script>
-// ========== CONFIG ==========
-const CLASSES=['5/A','5/B','6/A','6/B','6/C','6/D','7/A','7/B','8/A','8/B'];
-const PASS={
-  '5/A':'maya5A','5/B':'maya5B','6/A':'maya6A','6/B':'maya6B',
-  '6/C':'maya6C','6/D':'maya6D','7/A':'maya7A','7/B':'maya7B',
-  '8/A':'maya8A','8/B':'maya8B'
-};
-const ADMIN_PW='MayaAdmin2026';
-const PTS=5;
-
-const CAT_ICON={plastik:'♻️',cam:'🍾',metal:'🥫',kagit:'📦',diger:'🔄'};
-const CAT_LBL={plastik:'Plastik',cam:'Cam',metal:'Metal',kagit:'Kağıt/Karton',diger:'Diğer'};
-const KW=[
-  {k:['glass','cam','verre'],c:'cam'},
-  {k:['alumin','tin','steel','metal','teneke'],c:'metal'},
-  {k:['cardboard','carton','karton','paper','kağıt'],c:'kagit'},
-  {k:['plastic','plastik','pet','hdpe','pp','ps','pvc'],c:'plastik'},
-];
-
-// ========== STATE ==========
-const allCodes=new Set();
-const cd={};
-CLASSES.forEach(c=>{cd[c]={pts:0,tx:[]};});
-const glog=[];
-const pendingApprovals=[]; // {id, bc, name, cls, date}
-
-let CLS=null;    // current logged-in class
-let ADMIN=false;
-let LOCKED=false;
-let pendingCls=null;
-let lookupData=null;
-let camReader=null;
-let camIsQr=false;
-let qrDone=false;
-
-// ========== THEME ==========
-function toggleTheme(){
-  const h=document.documentElement;
-  const d=h.getAttribute('data-theme')==='dark';
-  h.setAttribute('data-theme',d?'light':'dark');
-  document.querySelector('.tb').textContent=d?'☀️':'🌙';
-}
-
-// ========== NAV ==========
-function showNavFor(ids){
-  ['nScan','nLb','nProf','nOut','nAdmin'].forEach(id=>{
-    document.getElementById(id).classList.toggle('on',ids.includes(id));
-  });
-}
-
-function goTo(pg){
-  if(pg==='admin'&&!ADMIN) return;
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.getElementById('pg'+pg.charAt(0).toUpperCase()+pg.slice(1)).classList.add('on');
-  ['nScan','nLb','nProf','nAdmin'].forEach(b=>document.getElementById(b).classList.remove('act'));
-  const m={scanner:'nScan',lb:'nLb',profile:'nProf',admin:'nAdmin'};
-  if(m[pg]) document.getElementById(m[pg]).classList.add('act');
-  if(pg==='lb') renderLb();
-  if(pg==='profile') renderProfile();
-  if(pg==='admin') renderAdmin();
-}
-
-function goHome(){
-  if(ADMIN){adLogout();return;}
-  if(CLS) logout();
-}
-
-// ========== LOGIN ==========
-function buildGrid(){
-  document.getElementById('cgrid').innerHTML=
-    CLASSES.map(c=>`<button class="cbtn" onclick="askPw('${c}')">${c}</button>`).join('');
-}
-
-function askPw(cls){
-  if(LOCKED){toast('Site Kilitli','Şu an giriş yapılamaz.',true);return;}
-  pendingCls=cls;
-  document.getElementById('pwTitle').textContent='🔐 '+cls+' Sınıfı';
-  document.getElementById('pwSub').textContent='Sınıf şifresini girin';
-  document.getElementById('pwIn').value='';
-  document.getElementById('pwErr').classList.remove('on');
-  document.getElementById('pwModal').classList.add('on');
-  setTimeout(()=>document.getElementById('pwIn').focus(),80);
-}
-
-function openAdminPw(){
-  pendingCls=null;
-  document.getElementById('pwTitle').textContent='⚙️ Yönetici';
-  document.getElementById('pwSub').textContent='Admin şifresini girin';
-  document.getElementById('pwIn').value='';
-  document.getElementById('pwErr').classList.remove('on');
-  document.getElementById('pwModal').classList.add('on');
-  setTimeout(()=>document.getElementById('pwIn').focus(),80);
-}
-
-function closePwModal(){
-  document.getElementById('pwModal').classList.remove('on');
-  pendingCls=null;
-}
-
-function confirmPw(){
-  const v=document.getElementById('pwIn').value;
-  if(pendingCls){
-    if(v===PASS[pendingCls]){
-      closePwModal();
-      loginAs(pendingCls);
-    } else {
-      document.getElementById('pwErr').classList.add('on');
-      document.getElementById('pwIn').value='';
-      document.getElementById('pwIn').focus();
-    }
-  } else {
-    if(v===ADMIN_PW){
-      closePwModal();
-      ADMIN=true;
-      document.getElementById('lkScreen').classList.remove('on');
-      showNavFor(['nAdmin','nOut']);
-      document.getElementById('nOut').onclick=adLogout;
-      goTo('admin');
-      document.getElementById('cbadge').classList.remove('on');
-    } else {
-      document.getElementById('pwErr').classList.add('on');
-      document.getElementById('pwIn').value='';
-      document.getElementById('pwIn').focus();
-    }
-  }
-}
-
-function loginAs(cls){
-  CLS=cls;
-  // Store in a hidden element as backup for Safari
-  document.getElementById('hiddenCls').value=cls;
-  document.getElementById('cbadgeTxt').textContent=cls;
-  document.getElementById('cbadge').classList.add('on');
-  document.getElementById('curClassName').textContent=cls;
-  showNavFor(['nScan','nLb','nProf','nOut']);
-  document.getElementById('nOut').onclick=logout;
-  resetForm();
-  updateSide();
-  updateTxList();
-  goTo('scanner');
-  toast('Hoş geldin!',cls+' sınıfına giriş yapıldı 👋');
-}
-
-function logout(){
-  CLS=null;
-  showNavFor([]);
-  document.getElementById('cbadge').classList.remove('on');
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.getElementById('pgLogin').classList.add('on');
-  resetForm();
-}
-
-function adLogout(){
-  ADMIN=false;
-  showNavFor([]);
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.getElementById('pgLogin').classList.add('on');
-  if(LOCKED) document.getElementById('lkScreen').classList.add('on');
-}
-
-// ========== BARCODE ==========
-function onBcType(el){
-  el.value=el.value.replace(/\D/g,'').substring(0,13);
-  lookupData=null;
-  document.getElementById('lbox').className='lbox';
-  document.getElementById('lbox').innerHTML='';
-  document.getElementById('warnBox').classList.remove('on');
-  document.getElementById('saveBtn').disabled=true;
-  // Show length hint
-  const len=el.value.length;
-  if(len>0&&len<8){
-    document.getElementById('lbox').className='lbox er';
-    document.getElementById('lbox').innerHTML=`<div class="nft">Barkod çok kısa (${len}/8)</div><div class="nfs">En az 8 haneli olmalı.</div>`;
-  }
-}
-
-async function doSearch(){
-  const bc=document.getElementById('bcIn').value.trim();
-
-  if(!bc||bc.length<8){
-    toast('Hata','Barkod en az 8 haneli olmalı!',true);
-    document.getElementById('lbox').className='lbox er';
-    document.getElementById('lbox').innerHTML='<div class="nft">⚠ Barkod çok kısa</div><div class="nfs">Geçerli bir ürün barkodu en az 8 haneli olmalıdır.</div>';
-    document.getElementById('saveBtn').disabled=true;
-    return;
-  }
-
-  // Aynı barkod daha önce kaydedilmişse fotoğraf iste
-  if(allCodes.has(bc)){
-    document.getElementById('warnBox').classList.remove('on');
-    lookupData={name:lookupData?.name||'Tekrar Ürün',brand:lookupData?.brand||'',cat:lookupData?.cat||'diger',icon:lookupData?.icon||'📷',bc,found:'duplicate'};
-    const box=document.getElementById('lbox');
-    box.className='lbox nf';
-    box.innerHTML=`
-      <div class="nft">📷 Bu barkod daha önce kaydedildi</div>
-      <div class="nfs">Tekrar kayıt için ürünün fotoğrafını çekip gönderin. Admin onaylarsa puan eklenecek.</div>`;
-    document.getElementById('saveBtn').textContent='📷 Fotoğraf Çek & Gönder';
-    document.getElementById('saveBtn').disabled=false;
-    return;
-  }
-  document.getElementById('warnBox').classList.remove('on');
-
-  const box=document.getElementById('lbox');
-  box.className='lbox load';
-  box.innerHTML='<div class="spin"></div><span>Ürün veritabanında aranıyor...</span>';
-  lookupData=null;
-  document.getElementById('saveBtn').disabled=true;
-
-  try{
-    const resp=await fetch(
-      `https://world.openfoodfacts.org/api/v0/product/${bc}.json`,
-      {signal:AbortSignal.timeout(10000)}
-    );
-    const d=await resp.json();
-
-    if(d.status===1 && d.product && (d.product.product_name||d.product.product_name_tr||d.product.product_name_en)){
-      const p=d.product;
-      const name=p.product_name_tr||p.product_name||p.product_name_en||'';
-      const brand=p.brands||'';
-      const pkg=(p.packaging||p.packaging_tags?.join(' ')||'').toLowerCase();
-      const nl=name.toLowerCase();
-      let cat='diger';
-      for(const e of KW){
-        if(e.k.some(k=>pkg.includes(k)||nl.includes(k))){cat=e.c;break;}
-      }
-      lookupData={name,brand,cat,icon:CAT_ICON[cat],bc,found:true};
-      box.className='lbox found';
-      box.innerHTML=`
-        <div style="font-size:30px;flex-shrink:0;">${CAT_ICON[cat]}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="lname">${name}</div>
-          <div class="lbrand">${brand?brand+' · ':''}${CAT_LBL[cat]}</div>
+    <!-- ŞİFRE MODAL -->
+    <div class="mover" id="pwModal">
+        <div class="mbox">
+            <h2 id="pwTitle" style="margin-bottom:10px; font-family:'Syne';">Giriş</h2>
+            <input type="password" class="fi" id="pwIn" placeholder="Şifre" autofocus>
+            <div style="display:flex; gap:10px;">
+                <button class="savebtn" style="background:var(--s2); color:var(--text);" onclick="closePwModal()">İptal</button>
+                <button class="savebtn" onclick="verifyPw()">Giriş Yap</button>
+            </div>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div class="lpts">${PTS}</div>
-          <div class="lptsl">puan</div>
-        </div>`;
-      document.getElementById('saveBtn').disabled=false;
-    } else {
-      // Not found — allow sending to admin for approval
-      lookupData={name:'Bilinmeyen Ürün ('+bc+')',brand:'',cat:'diger',icon:'❓',bc,found:false};
-      box.className='lbox nf';
-      box.innerHTML=`
-        <div class="nft">⚠ Ürün veritabanında bulunamadı</div>
-        <div class="nfs">Onay için admin paneline gönderilebilir. Admin onaylarsa puan hesabına yansır.</div>`;
-      document.getElementById('saveBtn').textContent='📨 Admin Onayına Gönder';
-      document.getElementById('saveBtn').disabled=false;
-    }
-  } catch(e){
-    lookupData=null;
-    document.getElementById('saveBtn').disabled=true;
-    box.className='lbox er';
-    box.innerHTML=`
-      <div class="nft">⚠ Bağlantı hatası</div>
-      <div class="nfs">İnternet bağlantınızı kontrol edin ve tekrar deneyin.</div>`;
-  }
-}
+    </div>
 
-function getActiveClass(){
-  // Try multiple sources for maximum reliability
-  return CLS
-    || document.getElementById('hiddenCls').value
-    || document.getElementById('cbadgeTxt').textContent
-    || null;
-}
-
-// ========== SAVE ==========
-function doSave(){
-  const activeClass = getActiveClass();
-  if(!lookupData){toast('Hata','Önce barkodu arayın.',true);return;}
-  if(!activeClass){toast('Hata','Önce sınıf girişi yapın.',true);return;}
-  const bc=lookupData.bc;
-  if(!bc){toast('Hata','Barkod bulunamadı.',true);return;}
-
-  // Tekrar barkod — fotoğraf iste
-  if(lookupData.found==='duplicate'){
-    openPhotoModal(bc, lookupData.name||'Tekrar Ürün', activeClass);
-    return;
-  }
-
-  // Veritabanında yok — fotoğrafla admin onayı
-  if(lookupData.found===false){
-    openPhotoModal(bc, 'Veritabanında bulunamadı', activeClass);
-    return;
-  }
-
-  // Veritabanında bulundu — direkt kaydet
-  if(!cd[activeClass]) cd[activeClass]={pts:0,tx:[]};
-  allCodes.add(bc);
-  const tx={
-    bc, name:lookupData.name, icon:lookupData.icon,
-    cat:lookupData.cat, pts:PTS, cls:activeClass,
-    date:new Date().toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}),
-    approved:true
-  };
-  cd[activeClass].pts+=PTS;
-  cd[activeClass].tx.unshift(tx);
-  glog.unshift(tx);
-  CLS=activeClass;
-  updateSide(true);
-  updateTxList();
-  toast('+5 puan kazanıldı!',`${tx.icon} ${tx.name}`);
-  resetForm();
-}
-
-// ========== PHOTO MODAL ==========
-let photoModalData=null;
-
-function openPhotoModal(bc, productName, cls){
-  photoModalData={bc, productName, cls};
-  document.getElementById('photoModal').classList.add('on');
-  document.getElementById('photoPreview').style.display='none';
-  document.getElementById('photoInput').value='';
-  document.getElementById('photoSendBtn').disabled=true;
-  document.getElementById('photoModalTitle').textContent=
-    allCodes.has(bc) ? '📷 Tekrar Ürün — Fotoğraf Gerekli' : '📷 Admin Onayı — Fotoğraf Gerekli';
-  document.getElementById('photoModalSub').textContent=
-    allCodes.has(bc)
-      ? 'Bu barkod daha önce kaydedildi. Ürünün fotoğrafını çekerek admin onayına gönderin.'
-      : 'Bu ürün veritabanında yok. Fotoğraf çekerek admin onayına gönderin.';
-}
-
-function onPhotoSelected(input){
-  const file=input.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const img=document.getElementById('photoPreview');
-    img.src=e.target.result;
-    img.style.display='block';
-    document.getElementById('photoSendBtn').disabled=false;
-    photoModalData.imageData=e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function sendPhotoApproval(){
-  if(!photoModalData) return;
-  const {bc, productName, cls, imageData}=photoModalData;
-  const pending={
-    id: Date.now(),
-    bc, productName, cls, imageData,
-    isDuplicate: allCodes.has(bc),
-    date: new Date().toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
-  };
-  pendingApprovals.push(pending);
-  document.getElementById('photoModal').classList.remove('on');
-  photoModalData=null;
-  updatePendingBadge();
-  toast('Gönderildi!','Admin onayına gönderildi ⏳ Onaylanınca puan yansır.');
-  resetForm();
-}
-
-function closePhotoModal(){
-  document.getElementById('photoModal').classList.remove('on');
-  photoModalData=null;
-}
-
-function updatePendingBadge(){
-  const count=pendingApprovals.length;
-  const btn=document.getElementById('nAdmin');
-  if(btn) btn.textContent='⚙ Admin'+(count>0?' ('+count+')':'');
-}
-
-function resetForm(){
-  document.getElementById('bcIn').value='';
-  document.getElementById('lbox').className='lbox';
-  document.getElementById('lbox').innerHTML='';
-  document.getElementById('warnBox').classList.remove('on');
-  document.getElementById('saveBtn').disabled=true;
-  document.getElementById('saveBtn').textContent='✓ 5 PUAN KAYDET';
-  lookupData=null;
-}
-
-function updateSide(anim){
-  const activeClass = getActiveClass();
-  if(!activeClass||!cd[activeClass]) return;
-  document.getElementById('sidePts').textContent=cd[activeClass].pts;
-  if(anim){
-    const el=document.getElementById('badd');
-    el.classList.add('on');
-    setTimeout(()=>el.classList.remove('on'),2500);
-  }
-}
-
-function updateTxList(){
-  const activeClass = getActiveClass();
-  if(!activeClass||!cd[activeClass]) return;
-  const txs=cd[activeClass].tx.slice(0,8);
-  const el=document.getElementById('txList');
-  if(!txs.length){el.innerHTML='<div class="empty">Henüz kayıt yok</div>';return;}
-  el.innerHTML=txs.map(t=>`
-    <div class="txi">
-      <div class="txic">${t.icon}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="txn">${t.name}</div>
-        <div class="txs">${t.bc} · ${t.date}</div>
-      </div>
-      <div class="txp">+${t.pts}</div>
-    </div>`).join('');
-}
-
-// ========== LEADERBOARD ==========
-function renderLb(){
-  const s=CLASSES.map(c=>({n:c,pts:cd[c].pts,cnt:cd[c].tx.length})).sort((a,b)=>b.pts-a.pts);
-  const max=s[0]?.pts||1;
-  const m=['🥇','🥈','🥉'];
-  document.getElementById('lbGrid').innerHTML=s.map((cl,i)=>`
-    <div class="lbr ${i<3?'r'+(i+1):''}">
-      <div class="lbrank">${m[i]||i+1}</div>
-      <div style="flex:1;">
-        <div class="lbcn">${cl.n}</div>
-        <div class="lbct">${cl.cnt} ürün</div>
-        <div class="lbbw"><div class="lbb" style="width:${Math.round(cl.pts/max*100)}%"></div></div>
-      </div>
-      <div class="lbp">${cl.pts}<br><span>puan</span></div>
-    </div>`).join('');
-}
-
-// ========== PROFILE ==========
-function renderProfile(){
-  if(!CLS) return;
-  const d=cd[CLS];
-  const s=CLASSES.map(c=>({n:c,pts:cd[c].pts})).sort((a,b)=>b.pts-a.pts);
-  const rank=s.findIndex(c=>c.n===CLS)+1;
-  const re=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
-  let badge='🌱 Başlangıç';
-  if(d.pts>=500) badge='🏆 Şampiyon';
-  else if(d.pts>=200) badge='⭐ Uzman';
-  else if(d.pts>=50) badge='🌿 Aktif';
-  document.getElementById('pAv').textContent=CLS;
-  document.getElementById('pName').textContent=CLS+' Sınıfı';
-  document.getElementById('pTotalC').textContent=d.tx.length;
-  document.getElementById('pTotalP').textContent=d.pts;
-  document.getElementById('pBadge').textContent=badge+' · '+re+'. Sıra';
-  const tb=document.getElementById('histBody');
-  if(!d.tx.length){tb.innerHTML='<tr><td colspan="4" class="empty">Kayıt yok</td></tr>';return;}
-  tb.innerHTML=d.tx.map(t=>`
-    <tr>
-      <td class="tc">${t.bc}</td>
-      <td>${t.icon} ${t.name}</td>
-      <td class="tg">+${t.pts}</td>
-      <td style="color:var(--dim);font-size:11px">${t.date}</td>
-    </tr>`).join('');
-}
-
-// ========== ADMIN ==========
-function approvePending(id){
-  const idx=pendingApprovals.findIndex(p=>p.id===id);
-  if(idx===-1) return;
-  const p=pendingApprovals[idx];
-  pendingApprovals.splice(idx,1);
-
-  if(!cd[p.cls]) cd[p.cls]={pts:0,tx:[]};
-  const tx={
-    bc:p.bc,
-    name:p.productName||p.name||'Onaylanan Ürün',
-    icon:'✅',
-    cat:'diger',
-    pts:PTS,
-    cls:p.cls,
-    date:p.date,
-    approved:true,
-    approvedDate:new Date().toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
-  };
-  cd[p.cls].pts+=PTS;
-  cd[p.cls].tx.unshift(tx);
-  glog.unshift(tx);
-
-  updatePendingBadge();
-  renderAdmin();
-  toast('Onaylandı!',p.cls+' sınıfına +5 puan eklendi ✓');
-}
-
-function rejectPending(id){
-  const idx=pendingApprovals.findIndex(p=>p.id===id);
-  if(idx===-1) return;
-  const p=pendingApprovals[idx];
-  // Remove from allCodes so it can be re-submitted
-  allCodes.delete(p.bc);
-  pendingApprovals.splice(idx,1);
-  updatePendingBadge();
-  renderAdmin();
-  toast('Reddedildi',p.bc+' barkodu reddedildi.',true);
-}
-
-function renderAdmin(){
-  const totC=glog.length;
-  const totP=CLASSES.reduce((s,c)=>s+cd[c].pts,0);
-  document.getElementById('adTotC').textContent=totC;
-  document.getElementById('adTotP').textContent=totP;
-  document.getElementById('lkBanner').classList.toggle('on',LOCKED);
-  document.getElementById('lkBtn').textContent=LOCKED?'🔓 Kilidi Aç':'🔒 Siteyi Kilitle';
-
-  // Pending approvals
-  const pCount=pendingApprovals.length;
-  document.getElementById('pendingCount').textContent=pCount;
-  document.getElementById('pendingSection').style.borderColor=pCount>0?'var(--yellow)':'var(--border)';
-  const pList=document.getElementById('pendingList');
-  if(!pCount){
-    pList.innerHTML='<div class="empty">Onay bekleyen ürün yok</div>';
-  } else {
-    pList.innerHTML=pendingApprovals.map(p=>`
-      <div class="pending-item" style="flex-wrap:wrap;gap:10px;">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-          ${p.imageData?`<img src="${p.imageData}" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border)"/>`:'<div style="width:64px;height:64px;background:var(--s2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">❓</div>'}
-          <div class="pending-info">
-            <div class="pending-bc">${p.bc}</div>
-            <div class="pending-name">${p.isDuplicate?'🔁 Tekrar ürün (aynı barkod)':'❓ Veritabanında bulunamadı'}</div>
-            <div class="pending-cls">📚 ${p.cls} · ${p.date}</div>
-          </div>
+    <!-- SCANNER -->
+    <div class="pg" id="pgScanner">
+        <div class="vh" id="curClassTitle">Barkod Kaydı</div>
+        <div class="card">
+            <input type="text" class="fi" id="bcIn" placeholder="Barkod Numarası" oninput="checkInput()">
+            <button class="savebtn" id="saveBtn" disabled onclick="openPhotoModal()">📷 FOTOĞRAF ÇEK VE GÖNDER</button>
         </div>
-        <div style="display:flex;gap:5px;flex-shrink:0;">
-          <button class="btn-approve" onclick="approvePending(${p.id})">✓ Onayla +5p</button>
-          <button class="btn-reject" onclick="rejectPending(${p.id})">✕ Reddet</button>
+    </div>
+
+    <!-- SIRALAMA -->
+    <div class="pg" id="pgRanking">
+        <div class="vh">Liderlik Tablosu</div>
+        <div class="card" id="rankList" style="padding:0;"></div>
+        <button class="savebtn" style="margin-top:20px; background:var(--s2); color:var(--text);" onclick="showPg('login')">Ana Menü</button>
+    </div>
+
+    <!-- ADMIN PANELI -->
+    <div class="pg" id="pgAdmin">
+        <div class="vh">Admin Kontrol</div>
+        
+        <h3 style="margin-bottom:10px;">Onay Bekleyenler</h3>
+        <div id="adminPendingList"></div>
+
+        <h3 style="margin: 20px 0 10px;">Sınıf Puan Yönetimi</h3>
+        <div class="card" id="adminClassList" style="padding:0;"></div>
+
+        <div class="card" style="margin-top:20px; border-color:var(--red);">
+            <button class="savebtn" style="background:var(--red);" onclick="resetAllPoints()">🛑 TÜM SINIFLARI SIFIRLA</button>
         </div>
-      </div>`).join('');
-  }
+    </div>
 
-  // Class grid
-  const s=CLASSES.map(c=>({n:c,...cd[c]})).sort((a,b)=>b.pts-a.pts);
-  const activeClass=getActiveClass();
-  document.getElementById('adClassGrid').innerHTML=s.map(cl=>`
-    <div class="adc" style="margin-bottom:8px;${activeClass&&cl.n===activeClass?'border-color:var(--green);background:var(--gglow);':''}">
-      <div class="adch">
-        <div class="adcn">${cl.n}${activeClass&&cl.n===activeClass?' <span style="font-size:9px;background:var(--green);color:#fff;padding:1px 6px;border-radius:99px;">Aktif</span>':''}</div>
-        <div class="adcp">${cl.pts} puan</div>
-        <button class="adcr" onclick="adResetClass('${cl.n}')">Sıfırla</button>
-      </div>
-      <div style="font-size:11px;color:var(--dim);margin-bottom:6px;">${cl.tx.length} ürün</div>
-      ${cl.tx.length?`
-      <div style="max-height:120px;overflow-y:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:11px;">
-          <thead><tr>
-            <th style="text-align:left;padding:3px 0;color:var(--dim);border-bottom:1px solid var(--border)">Barkod</th>
-            <th style="text-align:left;padding:3px 0;color:var(--dim);border-bottom:1px solid var(--border)">Ürün</th>
-            <th style="text-align:left;padding:3px 0;color:var(--dim);border-bottom:1px solid var(--border)">Puan</th>
-            <th style="text-align:left;padding:3px 0;color:var(--dim);border-bottom:1px solid var(--border)">Tarih</th>
-          </tr></thead>
-          <tbody>${cl.tx.map(t=>`
-            <tr>
-              <td style="padding:4px 0;font-family:monospace;color:var(--dim)">${t.bc}</td>
-              <td style="padding:4px 0">${t.icon} ${t.name}${t.approvedDate?' <span style="font-size:9px;color:var(--green)">(Admin onayladı)</span>':''}</td>
-              <td style="padding:4px 0;color:var(--green);font-weight:700">+${t.pts}</td>
-              <td style="padding:4px 0;color:var(--dim)">${t.date}</td>
-            </tr>`).join('')}</tbody>
-        </table>
-      </div>`:'<div class="empty" style="padding:8px 0">Kayıt yok</div>'}
-    </div>`).join('');
+    <!-- FOTO MODAL -->
+    <div class="mover" id="photoModal">
+        <div class="mbox">
+            <h3 style="margin-bottom:15px;">Ürün Kanıtı</h3>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none;" onchange="previewImg(this)">
+            <label for="photoInput" style="display:block; width:100%; padding:30px; border:2px dashed var(--border); border-radius:15px; text-align:center; cursor:pointer;">
+                <span id="labelTxt">📸 Kamerayı Aç</span>
+                <img id="prev" style="display:none; width:100%; border-radius:10px;">
+            </label>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="savebtn" style="background:var(--s2); color:var(--text);" onclick="closeModal()">İptal</button>
+                <button class="savebtn" id="sendBtn" disabled onclick="submitApproval()">Onaya Gönder</button>
+            </div>
+        </div>
+    </div>
 
-  const logEl=document.getElementById('adLog');
-  logEl.innerHTML=glog.length
-    ?glog.map(t=>`<div class="adle">[${t.date}] ${t.cls} · ${t.icon} ${t.name} · ${t.bc} · +${t.pts}p${t.approvedDate?' ✓ Admin onaylı':''}</div>`).join('')
-    :'<div class="empty">Henüz işlem yok</div>';
+    <div class="toast" id="toast"></div>
 
-  renderQR();
-}
+    <script>
+        const CLASS_CONFIG = {
+            '5/A': 'maya5A', '5/B': 'maya5B', '6/A': 'maya6A', '6/B': 'maya6B',
+            '6/C': 'maya6C', '6/D': 'maya6D', '7/A': 'maya7A', '7/B': 'maya7B',
+            '8/A': 'maya8A', '8/B': 'maya8B', 'ADMIN': 'MayaAdmin2026'
+        };
 
-function adResetAll(){
-  if(!confirm('Tüm puanlar silinecek. Emin misin?')) return;
-  CLASSES.forEach(c=>{cd[c]={pts:0,tx:[]};});
-  allCodes.clear(); glog.length=0;
-  renderAdmin(); toast('Sıfırlandı','Tüm veriler silindi.',true);
-}
+        let scores = JSON.parse(localStorage.getItem('maya_scores')) || {};
+        Object.keys(CLASS_CONFIG).forEach(c => { if(c !== 'ADMIN' && !scores[c]) scores[c] = 0; });
 
-function adResetClass(cls){
-  if(!confirm(cls+' sınıfı sıfırlanacak. Emin misin?')) return;
-  cd[cls].tx.forEach(t=>allCodes.delete(t.bc));
-  for(let i=glog.length-1;i>=0;i--){if(glog[i].cls===cls)glog.splice(i,1);}
-  cd[cls]={pts:0,tx:[]};
-  renderAdmin(); toast('Sıfırlandı',cls+' verileri silindi.',true);
-}
+        let currentClass = "";
+        let selectedClassForLogin = "";
+        let pendingItems = [];
 
-function toggleLock(){
-  LOCKED=!LOCKED;
-  localStorage.setItem('maya_locked',LOCKED?'1':'0');
-  document.getElementById('lkScreen').classList.toggle('on',LOCKED&&!ADMIN);
-  renderAdmin();
-  toast(LOCKED?'Kilitlendi':'Açıldı',LOCKED?'Kullanıcılar giremez.':'Site aktif.',LOCKED);
-}
+        function buildLogin() {
+            const grid = document.getElementById('cgrid');
+            grid.innerHTML = "";
+            Object.keys(CLASS_CONFIG).forEach(cls => {
+                if(cls === 'ADMIN') return;
+                const btn = document.createElement('button');
+                btn.className = 'cbtn'; btn.innerText = cls;
+                btn.onclick = () => openPwModal(cls);
+                grid.appendChild(btn);
+            });
+        }
 
-// ========== QR ==========
-function renderQR(){
-  if(qrDone) return;
-  qrDone=true;
-  document.getElementById('qrGrid').innerHTML=CLASSES.map(c=>`
-    <div class="qrc">
-      <div class="qrct">${c}</div>
-      <div class="qrw" id="qr${c.replace('/','_')}"></div>
-    </div>`).join('');
-  CLASSES.forEach(c=>{
-    const el=document.getElementById('qr'+c.replace('/','_'));
-    try{
-      new QRCode(el,{text:'MAYA_CLASS:'+c,width:110,height:110,
-        colorDark:'#000000',colorLight:'#ffffff',
-        correctLevel:QRCode.CorrectLevel.H});
-    }catch(e){el.innerHTML='<span style="color:var(--red);font-size:10px">Hata</span>';}
-  });
-}
+        function openPwModal(cls) {
+            selectedClassForLogin = cls;
+            document.getElementById('pwTitle').innerText = cls + " Girişi";
+            document.getElementById('pwIn').value = "";
+            document.getElementById('pwModal').classList.add('on');
+        }
 
-// ========== CAMERA ==========
-async function openCam(isQr){
-  camIsQr=isQr;
-  document.getElementById('camTitle').textContent=isQr?'📷 QR ile Giriş':'📷 Barkod Tara';
-  document.getElementById('camSub').textContent=isQr?'Sınıf QR kodunu göster':'Ürünün barkodunu göster';
-  document.getElementById('camSt').textContent='Kamera başlatılıyor...';
-  document.getElementById('camSt').className='cst';
-  document.getElementById('camModal').classList.add('on');
+        function closePwModal() { document.getElementById('pwModal').classList.remove('on'); }
 
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:{ideal:'environment'}}
-    });
-    const vid=document.getElementById('camVid');
-    vid.srcObject=stream;
-    await vid.play();
-    document.getElementById('camSt').textContent=isQr?'QR kodu göster...':'Barkodu göster...';
+        function verifyPw() {
+            const input = document.getElementById('pwIn').value;
+            if(input === CLASS_CONFIG[selectedClassForLogin]) {
+                closePwModal();
+                if(selectedClassForLogin === 'ADMIN') { showPg('admin'); renderAdmin(); }
+                else { currentClass = selectedClassForLogin; showPg('scanner'); document.getElementById('curClassTitle').innerText = currentClass; }
+                document.getElementById('btnLogout').classList.add('on');
+                document.getElementById('btnRank').classList.add('on');
+            } else { alert("Hatalı Şifre!"); }
+        }
 
-    // Use ZXing if available
-    const Z=window.ZXing||window.ZXingBrowser||window['@zxing/browser'];
-    if(Z&&Z.BrowserMultiFormatReader){
-      camReader=new Z.BrowserMultiFormatReader();
-      camReader.decodeFromStream(stream,vid,(res,err)=>{
-        if(res) handleScan(res.getText());
-      });
-    } else {
-      // Canvas polling fallback
-      startCanvasScan(vid,isQr);
-    }
-  }catch(e){
-    document.getElementById('camSt').textContent='Kamera izni gerekli.';
-    document.getElementById('camSt').className='cst err';
-  }
-}
+        function logout() {
+            currentClass = "";
+            document.getElementById('btnLogout').classList.remove('on');
+            document.getElementById('btnRank').classList.remove('on');
+            showPg('login');
+        }
 
-let canvasTimer=null;
-function startCanvasScan(vid){
-  // Without ZXing we just show the camera and user manually types if needed
-  document.getElementById('camSt').textContent='Kamera açık — barkodu göster';
-}
+        function showPg(id) {
+            document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+            document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on');
+            if(id === 'ranking') renderRanking();
+            if(id === 'admin') renderAdmin();
+        }
 
-function handleScan(text){
-  if(camIsQr){
-    if(text.startsWith('MAYA_CLASS:')){
-      const cls=text.replace('MAYA_CLASS:','');
-      if(CLASSES.includes(cls)){
-        document.getElementById('camSt').textContent='✓ '+cls+' tanındı!';
-        document.getElementById('camSt').className='cst ok';
-        setTimeout(()=>{closeCamera();askPw(cls);},600);
-      }
-    }
-  } else {
-    const num=text.replace(/\D/g,'').substring(0,13);
-    if(num.length>=8){
-      document.getElementById('camSt').textContent='✓ Barkod: '+num;
-      document.getElementById('camSt').className='cst ok';
-      document.getElementById('bcIn').value=num;
-      lookupData=null;
-      setTimeout(()=>{closeCamera();doSearch();},600);
-    }
-  }
-}
+        function renderRanking() {
+            const list = document.getElementById('rankList');
+            const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+            list.innerHTML = sorted.map((s, i) => `
+                <div class="rank-item">
+                    <span><b>${i+1}.</b> ${s[0]}</span>
+                    <span style="color:var(--green); font-weight:800;">${s[1]} Puan</span>
+                </div>
+            `).join('');
+        }
 
-function closeCamera(){
-  document.getElementById('camModal').classList.remove('on');
-  if(camReader){try{camReader.reset();}catch(e){} camReader=null;}
-  if(canvasTimer){clearInterval(canvasTimer);canvasTimer=null;}
-  const v=document.getElementById('camVid');
-  if(v.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null;}
-}
+        function renderAdmin() {
+            // Onay bekleyenler
+            const pList = document.getElementById('adminPendingList');
+            if(pendingItems.length === 0) pList.innerHTML = "<div class='card'>Onay bekleyen yok.</div>";
+            else {
+                pList.innerHTML = pendingItems.map(item => `
+                    <div class="card">
+                        <b>${item.class} (${item.bc})</b>
+                        <img src="${item.img}" style="width:100%; border-radius:10px; margin:10px 0;">
+                        <div style="display:flex; gap:10px;">
+                            <button class="savebtn" onclick="approve(${item.id})">Onayla</button>
+                            <button class="savebtn" style="background:var(--red);" onclick="reject(${item.id})">Reddet</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
-document.getElementById('camModal').addEventListener('click',e=>{if(e.target===document.getElementById('camModal'))closeCamera();});
-document.getElementById('pwModal').addEventListener('click',e=>{if(e.target===document.getElementById('pwModal'))closePwModal();});
+            // Tek tek sıfırlama listesi
+            const cList = document.getElementById('adminClassList');
+            cList.innerHTML = Object.entries(scores).map(([cls, val]) => `
+                <div class="rank-item">
+                    <span><b>${cls}:</b> ${val} Puan</span>
+                    <button class="reset-mini" onclick="resetSingleClass('${cls}')">Sıfırla</button>
+                </div>
+            `).join('');
+        }
 
-// ========== TOAST ==========
-function toast(title,sub,err=false){
-  document.getElementById('tostt').textContent=title;
-  document.getElementById('tosts').textContent=sub;
-  const t=document.getElementById('toast');
-  const i=document.getElementById('tosti');
-  t.style.borderColor=err?'var(--red)':'var(--green)';
-  i.style.background=err?'var(--red)':'var(--green)';
-  i.textContent=err?'✕':'✓';
-  t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'),3500);
-}
+        function resetSingleClass(cls) {
+            if(confirm(`${cls} sınıfının puanını sıfırlamak istediğinize emin misiniz?`)) {
+                scores[cls] = 0;
+                saveAndRefresh();
+                showToast(`${cls} puanı sıfırlandı.`, true);
+            }
+        }
 
-// ========== INIT ==========
-buildGrid();
-showNavFor([]);
+        function approve(id) {
+            const item = pendingItems.find(i => i.id === id);
+            scores[item.class] += 5;
+            pendingItems = pendingItems.filter(i => i.id !== id);
+            saveAndRefresh();
+            showToast("Puan eklendi!");
+        }
 
-// Check localStorage lock first
-if(localStorage.getItem('maya_locked')==='1'){
-  LOCKED=true;
-  document.getElementById('lkScreen').classList.add('on');
-}
+        function reject(id) {
+            pendingItems = pendingItems.filter(i => i.id !== id);
+            renderAdmin();
+            showToast("Reddedildi.", true);
+        }
 
-// Also check GitHub lock file (works across all devices)
-async function checkGithubLock(){
-  try{
-    const r=await fetch('lock.txt?t='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(3000)});
-    if(r.ok){
-      const txt=(await r.text()).trim();
-      if(txt==='locked'&&!ADMIN){
-        LOCKED=true;
-        document.getElementById('lkScreen').classList.add('on');
-      } else if(txt==='open'){
-        LOCKED=false;
-        if(!ADMIN) document.getElementById('lkScreen').classList.remove('on');
-      }
-    }
-  }catch(e){/* no lock file, ignore */}
-}
-checkGithubLock();
-</script>
+        function resetAllPoints() {
+            if(confirm("Tüm okulun puanlarını silmek istediğinize emin misiniz?")) {
+                Object.keys(scores).forEach(c => scores[c] = 0);
+                saveAndRefresh();
+                showToast("Tüm okul sıfırlandı!", true);
+            }
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('maya_scores', JSON.stringify(scores));
+            renderAdmin();
+        }
+
+        // --- DİĞER FONKSİYONLAR (Scan, Foto vb.) ---
+        function checkInput() { document.getElementById('saveBtn').disabled = document.getElementById('bcIn').value.length < 5; }
+        function openPhotoModal() { document.getElementById('photoModal').classList.add('on'); }
+        function closeModal() { document.getElementById('photoModal').classList.remove('on'); }
+        function previewImg(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('prev').src = e.target.result;
+                document.getElementById('prev').style.display = "block";
+                document.getElementById('labelTxt').style.display = "none";
+                document.getElementById('sendBtn').disabled = false;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+        function submitApproval() {
+            pendingItems.push({ id: Date.now(), class: currentClass, bc: document.getElementById('bcIn').value, img: document.getElementById('prev').src });
+            showToast("Gönderildi!");
+            document.getElementById('bcIn').value = ""; document.getElementById('prev').style.display = "none"; document.getElementById('labelTxt').style.display = "block";
+            closeModal();
+        }
+        function showToast(msg, red=false) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.borderColor = red ? "var(--red)" : "var(--green)";
+            t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 3000);
+        }
+
+        buildLogin();
+    </script>
 </body>
 </html>
