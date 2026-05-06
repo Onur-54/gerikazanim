@@ -12,7 +12,7 @@
         .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; max-width:500px; margin:20px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .rank-item { display:flex; justify-content:space-between; padding:15px; border-bottom:1px solid var(--border); align-items:center; }
         .btn { background:var(--green); color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; width:100%; margin-top:10px; font-weight:bold; transition: 0.2s; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn:disabled { background:#21262d; color:#7d8590; cursor: not-allowed; }
         input { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid var(--border); background:#0d1117; color:white; box-sizing: border-box; }
         .pg { display:none; } .on { display:block; }
         .class-grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
@@ -62,7 +62,7 @@
             <img id="preview" class="img-preview">
 
             <button class="btn" id="sendBtn" onclick="sendToAdmin()" style="margin-top:20px;" disabled>ONAYA GÖNDER</button>
-            <button class="btn" style="background:var(--red);" onclick="showPg('login')">İptal Et</button>
+            <button class="btn" style="background:var(--red);" onclick="logoutAndClear()">İptal Et / Geri Dön</button>
         </div>
     </div>
 
@@ -92,20 +92,38 @@
         let currentClass = "";
         let base64Image = "";
 
+        // Fotoğraf İşleme - Butonu Kesin Aktifleştirir
         function handleFile(input) {
             const file = input.files[0];
             if(!file) return;
             const reader = new FileReader();
+            reader.onloadstart = function() {
+                document.getElementById('sendBtn').innerText = "Yükleniyor...";
+            };
             reader.onloadend = function() {
                 base64Image = reader.result;
                 const img = document.getElementById('preview');
                 img.src = base64Image;
                 img.style.display = "block";
-                document.getElementById('sendBtn').disabled = false;
+                const sendBtn = document.getElementById('sendBtn');
+                sendBtn.disabled = false; // BUTONU AKTİF ET
+                sendBtn.innerText = "ONAYA GÖNDER";
             }
             reader.readAsDataURL(file);
         }
 
+        // Formu ve Hafızayı Sıfırlama Fonksiyonu
+        function logoutAndClear() {
+            document.getElementById('bcIn').value = "";
+            document.getElementById('preview').style.display = "none";
+            document.getElementById('preview').src = "";
+            document.getElementById('fileIn').value = "";
+            base64Image = "";
+            document.getElementById('sendBtn').disabled = true;
+            showPg('login');
+        }
+
+        // Sıralama
         db.ref('scores').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('rankList');
@@ -114,7 +132,7 @@
             list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name} Şubesi</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
         });
 
-        // ADMIN PANELİ - REDDETME ÖZELLİĞİ EKLENDİ
+        // Admin Listesi
         db.ref('approvals').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('adminList');
@@ -127,7 +145,7 @@
                     <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ FOTOĞRAFI GÖR</button>
                     <img id="img-${id}" src="${item.img}" class="admin-img" onclick="window.open(this.src)">
                     <div style="display:flex; gap:10px;">
-                        <button class="btn" onclick="approve('${id}', '${item.cls}')">✅ KABUL ET (+5)</button>
+                        <button class="btn" onclick="approve('${id}', '${item.cls}')">✅ KABUL ET</button>
                         <button class="btn" style="background:var(--red);" onclick="reject('${id}')">❌ REDDET</button>
                     </div>
                 </div>`).join('');
@@ -142,7 +160,16 @@
             const val = document.getElementById('pwIn').value;
             if(val === CLASSES[selected]) {
                 if(selected === 'ADMIN') showPg('admin');
-                else { currentClass = selected; showPg('scan'); document.getElementById('scanTitle').innerText = currentClass + " Kaydı"; }
+                else { 
+                    currentClass = selected; 
+                    // SINIF GİRİŞİNDE FORMU TEMİZLE (Kritik Düzeltme)
+                    document.getElementById('bcIn').value = "";
+                    document.getElementById('preview').style.display = "none";
+                    base64Image = "";
+                    document.getElementById('sendBtn').disabled = true;
+                    showPg('scan'); 
+                    document.getElementById('scanTitle').innerText = currentClass + " Kaydı"; 
+                }
                 document.getElementById('pwIn').value = "";
             } else { alert("Hatalı Şifre!"); }
         }
@@ -152,26 +179,25 @@
             if (!bc) return alert("Hata: Barkod yazın!");
             if (!base64Image) return alert("Hata: Fotoğraf çekin!");
 
+            document.getElementById('sendBtn').innerText = "Gönderiliyor...";
+            document.getElementById('sendBtn').disabled = true;
+
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
                 alert("Başarılı! Kayıt onaya gönderildi.");
-                document.getElementById('bcIn').value = "";
-                document.getElementById('preview').style.display = "none";
-                base64Image = "";
-                document.getElementById('sendBtn').disabled = true;
-                showPg('login');
+                logoutAndClear();
+            }).catch(e => {
+                alert("Sistem hatası: " + e.message);
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('sendBtn').innerText = "ONAYA GÖNDER";
             });
         }
 
-        // KABUL ETME
         function approve(id, cls) {
-            db.ref('scores/' + cls).transaction(c => (c || 0) + 5).then(() => {
-                db.ref('approvals/' + id).remove();
-            });
+            db.ref('scores/' + cls).transaction(c => (c || 0) + 5).then(() => db.ref('approvals/' + id).remove());
         }
 
-        // REDDETME (Veriyi sadece siler, puan vermez)
         function reject(id) {
-            if(confirm("Bu kaydı reddetmek istediğinize emin misiniz? Puan verilmeyecektir.")) {
+            if(confirm("Bu kaydı reddetmek istediğinize emin misiniz?")) {
                 db.ref('approvals/' + id).remove();
             }
         }
