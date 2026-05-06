@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeriKazanım — Maya Okulları</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK (v9 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --bg:#0d1117; --surface:#161b22; --s2:#21262d; --border:#30363d;
@@ -14,42 +19,30 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'DM Sans', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-
         nav { position:sticky; top:0; z-index:100; background:var(--bg); border-bottom:1px solid var(--border); height:60px; padding:0 20px; display:flex; align-items:center; justify-content:space-between; }
         .logo { font-family:'Syne',sans-serif; font-weight:900; color:var(--green); font-size:20px; }
         .nr { display:flex; gap:10px; }
         .nb { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; display:none; }
         .nb.on { display:block; }
         .nb.red { color: var(--red); border-color: var(--red); }
-
         .pg { display:none; max-width:600px; margin:40px auto; padding:0 20px; }
         .pg.on { display:block; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from {opacity:0; transform: translateY(20px)} to {opacity:1; transform: translateY(0)} }
-
         .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:24px; box-shadow:var(--sh); margin-bottom: 15px; }
         .vh { font-family:'Syne',sans-serif; font-size:28px; font-weight:900; margin-bottom:8px; text-align:center; }
         .vs { color:var(--dim); font-size:15px; margin-bottom:24px; text-align:center; }
-
         .cgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px; }
-        .cbtn { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:16px; border-radius:12px; cursor:pointer; font-weight:bold; transition: 0.2s; }
+        .cbtn { background:var(--s2); border:1px solid var(--border); color:var(--text); padding:16px; border-radius:12px; cursor:pointer; font-weight:bold; transition: 0.2s; text-align:center;}
         .cbtn:hover { border-color:var(--green); background: var(--gglow); }
-        .admin-btn { grid-column: 1 / -1; margin-top: 15px; background:transparent; border-style: dashed; color: var(--dim); }
-
-        .fi { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:14px; border-radius:10px; margin-bottom:15px; outline:none; }
+        .fi { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:14px; border-radius:10px; margin-bottom:15px; outline:none; font-size:16px;}
         .savebtn { width:100%; padding:15px; border-radius:12px; border:none; font-family:'Syne',sans-serif; font-weight:800; cursor:pointer; background:var(--green); color:white; transition: 0.2s; }
-        .savebtn:disabled { opacity:0.4; }
-
-        /* Sıralama ve Yönetim Listesi */
+        .savebtn:disabled { opacity:0.4; cursor: not-allowed; }
         .rank-item { display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px solid var(--border); }
         .rank-item:last-child { border-bottom: none; }
-        .reset-mini { background: rgba(248,81,73,0.1); border: 1px solid var(--red); color: var(--red); padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .reset-mini:hover { background: var(--red); color: white; }
-
         .mover { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(4px); }
         .mover.on { display:flex; }
         .mbox { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:30px; width:100%; max-width:380px; }
-
-        .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--s2); border:1px solid var(--green); padding:14px 24px; border-radius:50px; transition:0.4s; opacity:0; z-index:2000; }
+        .toast { position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--s2); border:1px solid var(--green); padding:14px 24px; border-radius:50px; transition:0.4s; opacity:0; z-index:2000; pointer-events: none;}
         .toast.on { transform:translateX(-50%) translateY(0); opacity:1; }
     </style>
 </head>
@@ -69,11 +62,11 @@
             <div class="vh">Sınıf Seçimi</div>
             <p class="vs">Devam etmek için sınıfınızı seçin.</p>
             <div class="cgrid" id="cgrid"></div>
-            <button class="cbtn admin-btn" onclick="openPwModal('ADMIN')">⚙️ Yönetici Paneli</button>
+            <button class="cbtn" style="grid-column: 1 / -1; margin-top:15px; border-style:dashed; color:var(--dim); width:100%;" onclick="openPwModal('ADMIN')">⚙️ Yönetici Paneli</button>
         </div>
     </div>
 
-    <!-- ŞİFRE MODAL -->
+    <!-- ŞİFRE MODALI -->
     <div class="mover" id="pwModal">
         <div class="mbox">
             <h2 id="pwTitle" style="margin-bottom:10px; font-family:'Syne';">Giriş</h2>
@@ -85,7 +78,7 @@
         </div>
     </div>
 
-    <!-- SCANNER -->
+    <!-- TARAYICI / KAYIT SAYFASI -->
     <div class="pg" id="pgScanner">
         <div class="vh" id="curClassTitle">Barkod Kaydı</div>
         <div class="card">
@@ -94,29 +87,23 @@
         </div>
     </div>
 
-    <!-- SIRALAMA -->
+    <!-- SIRALAMA SAYFASI -->
     <div class="pg" id="pgRanking">
         <div class="vh">Liderlik Tablosu</div>
         <div class="card" id="rankList" style="padding:0;"></div>
         <button class="savebtn" style="margin-top:20px; background:var(--s2); color:var(--text);" onclick="showPg('login')">Ana Menü</button>
     </div>
 
-    <!-- ADMIN PANELI -->
+    <!-- YÖNETİCİ SAYFASI -->
     <div class="pg" id="pgAdmin">
         <div class="vh">Admin Kontrol</div>
-        
-        <h3 style="margin-bottom:10px;">Onay Bekleyenler</h3>
-        <div id="adminPendingList"></div>
-
-        <h3 style="margin: 20px 0 10px;">Sınıf Puan Yönetimi</h3>
-        <div class="card" id="adminClassList" style="padding:0;"></div>
-
         <div class="card" style="margin-top:20px; border-color:var(--red);">
+            <p style="margin-bottom:15px; color:var(--dim); text-align:center;">Tüm sınıf puanlarını kalıcı olarak siler.</p>
             <button class="savebtn" style="background:var(--red);" onclick="resetAllPoints()">🛑 TÜM SINIFLARI SIFIRLA</button>
         </div>
     </div>
 
-    <!-- FOTO MODAL -->
+    <!-- FOTOĞRAF MODALI -->
     <div class="mover" id="photoModal">
         <div class="mbox">
             <h3 style="margin-bottom:15px;">Ürün Kanıtı</h3>
@@ -127,7 +114,7 @@
             </label>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button class="savebtn" style="background:var(--s2); color:var(--text);" onclick="closeModal()">İptal</button>
-                <button class="savebtn" id="sendBtn" disabled onclick="submitApproval()">Onaya Gönder</button>
+                <button class="savebtn" id="sendBtn" disabled onclick="submitApproval()">Puanı Kaydet</button>
             </div>
         </div>
     </div>
@@ -135,25 +122,42 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const CLASS_CONFIG = {
-            '5/A': 'maya5A', '5/B': 'maya5B', '6/A': 'maya6A', '6/B': 'maya6B',
-            '6/C': 'maya6C', '6/D': 'maya6D', '7/A': 'maya7A', '7/B': 'maya7B',
-             'ADMIN': 'MayaAdmin2026'
+        // --- SENİN AKTİF FIREBASE BİLGİLERİN ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmkMyRIBgih2b4nHqA0sVOz7j0m54shbc",
+            authDomain: "gerikazanim-90377.firebaseapp.com",
+            databaseURL: "https://gerikazanim-90377-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "gerikazanim-90377",
+            storageBucket: "gerikazanim-90377.firebasestorage.app",
+            messagingSenderId: "1095825108454",
+            appId: "1:1095825108454:web:fbc11b37790864e16d3a27"
         };
 
-        let scores = JSON.parse(localStorage.getItem('maya_scores')) || {};
-        Object.keys(CLASS_CONFIG).forEach(c => { if(c !== 'ADMIN' && !scores[c]) scores[c] = 0; });
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
+        // --- OKUL AYARLARI ---
+        const CLASS_CONFIG = {
+            '5/A': 'maya5A', '5/B': 'maya5B', '6/A': 'maya6A', '6/B': 'maya6B',
+            '7/A': 'maya7A', '7/B': 'maya7B', 'ADMIN': 'MayaAdmin2026'
+        };
+
+        let scores = {};
         let currentClass = "";
         let selectedClassForLogin = "";
-        let pendingItems = [];
+
+        // Veritabanını dinle
+        db.ref('scores').on('value', (snap) => {
+            scores = snap.val() || {};
+            renderRanking();
+        });
 
         function buildLogin() {
             const grid = document.getElementById('cgrid');
             grid.innerHTML = "";
             Object.keys(CLASS_CONFIG).forEach(cls => {
                 if(cls === 'ADMIN') return;
-                const btn = document.createElement('button');
+                const btn = document.createElement('div');
                 btn.className = 'cbtn'; btn.innerText = cls;
                 btn.onclick = () => openPwModal(cls);
                 grid.appendChild(btn);
@@ -165,6 +169,7 @@
             document.getElementById('pwTitle').innerText = cls + " Girişi";
             document.getElementById('pwIn').value = "";
             document.getElementById('pwModal').classList.add('on');
+            setTimeout(() => document.getElementById('pwIn').focus(), 300);
         }
 
         function closePwModal() { document.getElementById('pwModal').classList.remove('on'); }
@@ -173,11 +178,17 @@
             const input = document.getElementById('pwIn').value;
             if(input === CLASS_CONFIG[selectedClassForLogin]) {
                 closePwModal();
-                if(selectedClassForLogin === 'ADMIN') { showPg('admin'); renderAdmin(); }
-                else { currentClass = selectedClassForLogin; showPg('scanner'); document.getElementById('curClassTitle').innerText = currentClass; }
+                if(selectedClassForLogin === 'ADMIN') { showPg('admin'); }
+                else { 
+                    currentClass = selectedClassForLogin; 
+                    showPg('scanner'); 
+                    document.getElementById('curClassTitle').innerText = currentClass; 
+                }
                 document.getElementById('btnLogout').classList.add('on');
                 document.getElementById('btnRank').classList.add('on');
-            } else { alert("Hatalı Şifre!"); }
+            } else { 
+                alert("Hatalı Şifre!"); 
+            }
         }
 
         function logout() {
@@ -190,13 +201,15 @@
         function showPg(id) {
             document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
             document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on');
-            if(id === 'ranking') renderRanking();
-            if(id === 'admin') renderAdmin();
         }
 
         function renderRanking() {
             const list = document.getElementById('rankList');
             const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+            if(sorted.length === 0) {
+                list.innerHTML = "<p style='padding:20px; color:var(--dim); text-align:center;'>Henüz puan kaydedilmemiş.</p>";
+                return;
+            }
             list.innerHTML = sorted.map((s, i) => `
                 <div class="rank-item">
                     <span><b>${i+1}.</b> ${s[0]}</span>
@@ -205,92 +218,51 @@
             `).join('');
         }
 
-        function renderAdmin() {
-            // Onay bekleyenler
-            const pList = document.getElementById('adminPendingList');
-            if(pendingItems.length === 0) pList.innerHTML = "<div class='card'>Onay bekleyen yok.</div>";
-            else {
-                pList.innerHTML = pendingItems.map(item => `
-                    <div class="card">
-                        <b>${item.class} (${item.bc})</b>
-                        <img src="${item.img}" style="width:100%; border-radius:10px; margin:10px 0;">
-                        <div style="display:flex; gap:10px;">
-                            <button class="savebtn" onclick="approve(${item.id})">Onayla</button>
-                            <button class="savebtn" style="background:var(--red);" onclick="reject(${item.id})">Reddet</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // Tek tek sıfırlama listesi
-            const cList = document.getElementById('adminClassList');
-            cList.innerHTML = Object.entries(scores).map(([cls, val]) => `
-                <div class="rank-item">
-                    <span><b>${cls}:</b> ${val} Puan</span>
-                    <button class="reset-mini" onclick="resetSingleClass('${cls}')">Sıfırla</button>
-                </div>
-            `).join('');
+        function checkInput() { 
+            document.getElementById('saveBtn').disabled = document.getElementById('bcIn').value.length < 5; 
         }
 
-        function resetSingleClass(cls) {
-            if(confirm(`${cls} sınıfının puanını sıfırlamak istediğinize emin misiniz?`)) {
-                scores[cls] = 0;
-                saveAndRefresh();
-                showToast(`${cls} puanı sıfırlandı.`, true);
+        function openPhotoModal() { document.getElementById('photoModal').classList.add('on'); }
+        function closeModal() { document.getElementById('photoModal').classList.remove('on'); }
+        
+        function previewImg(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('prev').src = e.target.result;
+                    document.getElementById('prev').style.display = "block";
+                    document.getElementById('labelTxt').style.display = "none";
+                    document.getElementById('sendBtn').disabled = false;
+                };
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function approve(id) {
-            const item = pendingItems.find(i => i.id === id);
-            scores[item.class] += 5;
-            pendingItems = pendingItems.filter(i => i.id !== id);
-            saveAndRefresh();
-            showToast("Puan eklendi!");
-        }
-
-        function reject(id) {
-            pendingItems = pendingItems.filter(i => i.id !== id);
-            renderAdmin();
-            showToast("Reddedildi.", true);
+        function submitApproval() {
+            const newScore = (scores[currentClass] || 0) + 5;
+            db.ref('scores/' + currentClass).set(newScore).then(() => {
+                showToast("5 Puan Eklendi!");
+                document.getElementById('bcIn').value = "";
+                document.getElementById('prev').style.display = "none";
+                document.getElementById('labelTxt').style.display = "block";
+                document.getElementById('sendBtn').disabled = true;
+                closeModal();
+            });
         }
 
         function resetAllPoints() {
-            if(confirm("Tüm okulun puanlarını silmek istediğinize emin misiniz?")) {
-                Object.keys(scores).forEach(c => scores[c] = 0);
-                saveAndRefresh();
-                showToast("Tüm okul sıfırlandı!", true);
+            if(confirm("DİKKAT: Tüm sınıfların puanları sıfırlanacak. Emin misiniz?")) {
+                db.ref('scores').remove().then(() => {
+                    showToast("Tüm puanlar sıfırlandı!", true);
+                });
             }
         }
 
-        function saveAndRefresh() {
-            localStorage.setItem('maya_scores', JSON.stringify(scores));
-            renderAdmin();
-        }
-
-        // --- DİĞER FONKSİYONLAR (Scan, Foto vb.) ---
-        function checkInput() { document.getElementById('saveBtn').disabled = document.getElementById('bcIn').value.length < 5; }
-        function openPhotoModal() { document.getElementById('photoModal').classList.add('on'); }
-        function closeModal() { document.getElementById('photoModal').classList.remove('on'); }
-        function previewImg(input) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('prev').src = e.target.result;
-                document.getElementById('prev').style.display = "block";
-                document.getElementById('labelTxt').style.display = "none";
-                document.getElementById('sendBtn').disabled = false;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-        function submitApproval() {
-            pendingItems.push({ id: Date.now(), class: currentClass, bc: document.getElementById('bcIn').value, img: document.getElementById('prev').src });
-            showToast("Gönderildi!");
-            document.getElementById('bcIn').value = ""; document.getElementById('prev').style.display = "none"; document.getElementById('labelTxt').style.display = "block";
-            closeModal();
-        }
         function showToast(msg, red=false) {
             const t = document.getElementById('toast');
             t.innerText = msg; t.style.borderColor = red ? "var(--red)" : "var(--green)";
-            t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 3000);
+            t.classList.add('on'); 
+            setTimeout(() => t.classList.remove('on'), 3000);
         }
 
         buildLogin();
