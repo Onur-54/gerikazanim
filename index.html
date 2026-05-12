@@ -78,12 +78,12 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        // Şifreler Base64 ile gizlendi (F12 ile bakıldığında okunamaz)
+        // Güncellenmiş Şifreler
         const SECRETS = {
             '5-A': 'bWF5YTVB', '5-B': 'bWF5YTVC', 
             '6-A': 'bWF5YTZB', '6-B': 'bWF5YTZC', '6-C': 'bWF5YTZD', '6-D': 'bWF5YTZE',
             '7-A': 'bWF5YTdB', '7-B': 'bWF5YTdC',
-            'ADMIN': 'TWF5YUFkbWluMjAyNg==' // Bu şifre "MayaAdmin2026" demektir
+            'ADMIN': 'bWF5YW1heWE=' // "mayamaya" şifresinin gizli hali
         };
 
         let selected = "";
@@ -102,7 +102,6 @@
 
         function checkPw() {
             const val = document.getElementById('pwIn').value.trim();
-            // Girilen şifreyi gizli formata çevirip kontrol ediyoruz
             if (btoa(val) === SECRETS[selected]) {
                 if (selected === 'ADMIN') {
                     showPg('admin');
@@ -138,7 +137,6 @@
             document.getElementById('preview').style.display = "none";
             base64Image = "";
             document.getElementById('sendBtn').disabled = true;
-            document.getElementById('sendBtn').innerText = "ONAYA GÖNDER";
             showPg('login');
         }
 
@@ -175,9 +173,9 @@
 
         function sendToAdmin() {
             const bc = document.getElementById('bcIn').value.trim();
-            if (!bc || !base64Image) return alert("Bilgiler eksik!");
+            if (!bc || !base64Image) return alert("Eksik bilgi!");
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
-                alert("Kayıt onaya gönderildi!");
+                alert("Onaya gönderildi!");
                 logoutAndClear();
             });
         }
@@ -187,7 +185,7 @@
         }
 
         function reject(id) {
-            if(confirm("Bu kaydı reddetmek istediğine emin misin?")) db.ref('approvals/' + id).remove();
+            if(confirm("Silinsin mi?")) db.ref('approvals/' + id).remove();
         }
 
         function build() {
@@ -201,11 +199,7 @@
                 g.appendChild(b);
             });
         }
-
-        function showPg(id) {
-            document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
-            document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on');
-        }
+        function showPg(id) { document.querySelectorAll('.pg').forEach(p => p.classList.remove('on')); document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on'); }
     </script>
 </body>
 </html>
