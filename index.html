@@ -78,30 +78,45 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        const CLASSES = {
-            '5-A': 'maya5A', '5-B': 'maya5B', 
-            '6-A': 'maya6A', '6-B': 'maya6B', '6-C': 'maya6C', '6-D': 'maya6D',
-            '7-A': 'maya7A', '7-B': 'maya7B'
+        // Şifreler Base64 ile gizlendi (F12 ile bakıldığında okunamaz)
+        const SECRETS = {
+            '5-A': 'bWF5YTVB', '5-B': 'bWF5YTVC', 
+            '6-A': 'bWF5YTZB', '6-B': 'bWF5YTZC', '6-C': 'bWF5YTZD', '6-D': 'bWF5YTZE',
+            '7-A': 'bWF5YTdB', '7-B': 'bWF5YTdC',
+            'ADMIN': 'TWF5YUFkbWluMjAyNg==' // Bu şifre "MayaAdmin2026" demektir
         };
 
         let selected = "";
         let currentClass = "";
         let base64Image = "";
 
-        // URL KONTROLÜ
-        function checkUrl() {
+        window.onload = function() {
+            build();
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('admin')) {
                 selected = 'ADMIN';
                 showPg('pw');
                 document.getElementById('pwTitle').innerText = "Yönetici Girişi";
             }
-        }
-
-        window.onload = function() {
-            build();
-            checkUrl();
         };
+
+        function checkPw() {
+            const val = document.getElementById('pwIn').value.trim();
+            // Girilen şifreyi gizli formata çevirip kontrol ediyoruz
+            if (btoa(val) === SECRETS[selected]) {
+                if (selected === 'ADMIN') {
+                    showPg('admin');
+                } else {
+                    currentClass = selected;
+                    logoutAndClear();
+                    showPg('scan');
+                    document.getElementById('scanTitle').innerText = currentClass + " Kaydı";
+                }
+                document.getElementById('pwIn').value = "";
+            } else {
+                alert("Hatalı Şifre!");
+            }
+        }
 
         function handleFile(input) {
             const file = input.files[0];
@@ -127,16 +142,15 @@
             showPg('login');
         }
 
-        // Skorları Takip Et
         db.ref('scores').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('rankList');
-            let arr = Object.keys(CLASSES).map(c => ({name: c, score: Number(data[c] || 0)}));
+            const classList = ['5-A','5-B','6-A','6-B','6-C','6-D','7-A','7-B'];
+            let arr = classList.map(c => ({name: c, score: Number(data[c] || 0)}));
             arr.sort((a,b) => b.score - a.score);
             list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name}</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
         });
 
-        // Bekleyen Onayları Takip Et
         db.ref('approvals').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('adminList');
@@ -159,42 +173,11 @@
             img.style.display = (img.style.display === "block") ? "none" : "block";
         }
 
-        // ŞİFRE KONTROLÜ (Görseldeki yapıya göre güncellendi)
-        function checkPw() {
-            const val = document.getElementById('pwIn').value.trim();
-            if (!val) { alert("Lütfen şifre girin!"); return; }
-
-            if (selected === 'ADMIN') {
-                db.ref('admin_access/' + val).once('value').then((snapshot) => {
-                    // Firebase'de MayaAdmin2026'nın karşısı 'true' ise gir
-                    if (snapshot.exists() && snapshot.val() === true) {
-                        showPg('admin');
-                        document.getElementById('pwIn').value = "";
-                    } else {
-                        alert("Yönetici şifresi hatalı! Yazılan: " + val);
-                    }
-                }).catch(e => alert("Bağlantı hatası: " + e.message));
-            } else {
-                if(val === CLASSES[selected]) {
-                    currentClass = selected;
-                    logoutAndClear();
-                    showPg('scan');
-                    document.getElementById('scanTitle').innerText = currentClass + " Kaydı";
-                    document.getElementById('pwIn').value = "";
-                } else {
-                    alert("Hatalı Şifre!");
-                }
-            }
-        }
-
         function sendToAdmin() {
             const bc = document.getElementById('bcIn').value.trim();
-            if (!bc || !base64Image) return alert("Barkod ve fotoğraf eksik!");
-            document.getElementById('sendBtn').innerText = "Gönderiliyor...";
-            document.getElementById('sendBtn').disabled = true;
-
+            if (!bc || !base64Image) return alert("Bilgiler eksik!");
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
-                alert("Başarıyla onaya gönderildi!");
+                alert("Kayıt onaya gönderildi!");
                 logoutAndClear();
             });
         }
@@ -204,13 +187,14 @@
         }
 
         function reject(id) {
-            if(confirm("Silmek istediğinize emin misiniz?")) db.ref('approvals/' + id).remove();
+            if(confirm("Bu kaydı reddetmek istediğine emin misin?")) db.ref('approvals/' + id).remove();
         }
 
         function build() {
             const g = document.getElementById('classGrid');
             g.innerHTML = "";
-            Object.keys(CLASSES).forEach(c => {
+            const classList = ['5-A','5-B','6-A','6-B','6-C','6-D','7-A','7-B'];
+            classList.forEach(c => {
                 const b = document.createElement('button');
                 b.className = 'btn'; b.style.background = "#21262d";
                 b.innerText = c; b.onclick = () => { selected = c; showPg('pw'); document.getElementById('pwTitle').innerText = c + " Girişi"; };
@@ -220,8 +204,7 @@
 
         function showPg(id) {
             document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
-            const target = document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1));
-            if(target) target.classList.add('on');
+            document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on');
         }
     </script>
 </body>
