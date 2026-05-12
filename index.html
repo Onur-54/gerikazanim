@@ -38,7 +38,7 @@
             <h3 id="pwTitle">Giriş</h3>
             <input type="password" id="pwIn" placeholder="Şifre">
             <button class="btn" onclick="checkPw()">Giriş Yap</button>
-            <button class="btn" style="background:none; color:#7d8590;" onclick="window.location.href=window.location.pathname">Vazgeç</button>
+            <button class="btn" style="background:none; color:#7d8590;" onclick="window.location.href=window.location.origin + window.location.pathname">Vazgeç</button>
         </div>
     </div>
 
@@ -54,12 +54,11 @@
         <div class="card">
             <h3 id="scanTitle">Kayıt</h3>
             <input type="text" id="bcIn" placeholder="Barkod Numarasını Yazın">
-            <p style="font-size: 13px; color: #7d8590; margin-top: 10px;">Kanıt fotoğrafı çekin:</p>
             <input type="file" id="fileIn" accept="image/*" capture="environment" style="display:none;" onchange="handleFile(this)">
-            <button class="btn" style="background:#21262d;" onclick="document.getElementById('fileIn').click()">📸 FOTOĞRAF ÇEK / SEÇ</button>
+            <button class="btn" style="background:#21262d;" onclick="document.getElementById('fileIn').click()">📸 FOTOĞRAF ÇEK</button>
             <img id="preview" class="img-preview">
             <button class="btn" id="sendBtn" onclick="sendToAdmin()" style="margin-top:20px;" disabled>ONAYA GÖNDER</button>
-            <button class="btn" style="background:var(--red);" onclick="logoutAndClear()">İptal Et / Geri Dön</button>
+            <button class="btn" style="background:var(--red);" onclick="logoutAndClear()">İptal Et</button>
         </div>
     </div>
 
@@ -67,7 +66,7 @@
         <div class="card">
             <h3>Yönetici Paneli</h3>
             <div id="adminList"></div>
-            <button class="btn" style="background:var(--red); margin-top:20px;" onclick="window.location.href=window.location.pathname">Güvenli Çıkış</button>
+            <button class="btn" style="background:var(--red); margin-top:20px;" onclick="window.location.href=window.location.origin + window.location.pathname">Güvenli Çıkış</button>
         </div>
     </div>
 
@@ -89,15 +88,19 @@
         let currentClass = "";
         let base64Image = "";
 
-        // GİZLİ LİNK KONTROLÜ (Kritik Bölüm)
-        window.onload = function() {
-            build();
-            // Eğer URL'de ?yönetici yazıyorsa admin şifre ekranını aç
-            if (window.location.search.includes('yönetici')) {
+        // GİZLİ GİRİŞ KONTROLÜ
+        function checkUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('admin')) {
                 selected = 'ADMIN';
                 showPg('pw');
                 document.getElementById('pwTitle').innerText = "Yönetici Girişi";
             }
+        }
+
+        window.onload = function() {
+            build();
+            checkUrl();
         };
 
         function handleFile(input) {
@@ -175,7 +178,6 @@
         function sendToAdmin() {
             const bc = document.getElementById('bcIn').value.trim();
             if (!bc || !base64Image) return alert("Eksik bilgi!");
-            document.getElementById('sendBtn').innerText = "Gönderiliyor...";
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
                 alert("Onaya gönderildi!");
                 logoutAndClear();
