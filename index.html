@@ -88,7 +88,7 @@
         let currentClass = "";
         let base64Image = "";
 
-        // GİZLİ GİRİŞ KONTROLÜ
+        // URL KONTROLÜ
         function checkUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('admin')) {
@@ -123,9 +123,11 @@
             document.getElementById('preview').style.display = "none";
             base64Image = "";
             document.getElementById('sendBtn').disabled = true;
+            document.getElementById('sendBtn').innerText = "ONAYA GÖNDER";
             showPg('login');
         }
 
+        // Skorları Takip Et
         db.ref('scores').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('rankList');
@@ -134,6 +136,7 @@
             list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name}</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
         });
 
+        // Bekleyen Onayları Takip Et
         db.ref('approvals').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('adminList');
@@ -156,30 +159,42 @@
             img.style.display = (img.style.display === "block") ? "none" : "block";
         }
 
+        // ŞİFRE KONTROLÜ (Görseldeki yapıya göre güncellendi)
         function checkPw() {
-            const val = document.getElementById('pwIn').value;
+            const val = document.getElementById('pwIn').value.trim();
+            if (!val) { alert("Lütfen şifre girin!"); return; }
+
             if (selected === 'ADMIN') {
                 db.ref('admin_access/' + val).once('value').then((snapshot) => {
+                    // Firebase'de MayaAdmin2026'nın karşısı 'true' ise gir
                     if (snapshot.exists() && snapshot.val() === true) {
                         showPg('admin');
                         document.getElementById('pwIn').value = "";
-                    } else { alert("Hatalı!"); }
-                });
+                    } else {
+                        alert("Yönetici şifresi hatalı! Yazılan: " + val);
+                    }
+                }).catch(e => alert("Bağlantı hatası: " + e.message));
             } else {
                 if(val === CLASSES[selected]) {
                     currentClass = selected;
                     logoutAndClear();
                     showPg('scan');
                     document.getElementById('scanTitle').innerText = currentClass + " Kaydı";
-                } else { alert("Hatalı!"); }
+                    document.getElementById('pwIn').value = "";
+                } else {
+                    alert("Hatalı Şifre!");
+                }
             }
         }
 
         function sendToAdmin() {
             const bc = document.getElementById('bcIn').value.trim();
-            if (!bc || !base64Image) return alert("Eksik bilgi!");
+            if (!bc || !base64Image) return alert("Barkod ve fotoğraf eksik!");
+            document.getElementById('sendBtn').innerText = "Gönderiliyor...";
+            document.getElementById('sendBtn').disabled = true;
+
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
-                alert("Onaya gönderildi!");
+                alert("Başarıyla onaya gönderildi!");
                 logoutAndClear();
             });
         }
@@ -189,7 +204,7 @@
         }
 
         function reject(id) {
-            if(confirm("Silinsin mi?")) db.ref('approvals/' + id).remove();
+            if(confirm("Silmek istediğinize emin misiniz?")) db.ref('approvals/' + id).remove();
         }
 
         function build() {
@@ -202,7 +217,12 @@
                 g.appendChild(b);
             });
         }
-        function showPg(id) { document.querySelectorAll('.pg').forEach(p => p.classList.remove('on')); document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on'); }
+
+        function showPg(id) {
+            document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+            const target = document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1));
+            if(target) target.classList.add('on');
+        }
     </script>
 </body>
 </html>
