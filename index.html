@@ -29,8 +29,7 @@
         <div class="card">
             <h3>Sınıfını Seç</h3>
             <div id="classGrid" class="class-grid"></div>
-            <button class="btn" style="background:#21262d; margin-top:20px;" onclick="openLogin('ADMIN')">⚙️ Yönetici Paneli</button>
-            <button class="btn" style="background:#21262d; margin-top:10px;" onclick="showPg('rank')">🏆 Mevcut Sıralama</button>
+            <button class="btn" style="background:#21262d; margin-top:20px;" onclick="showPg('rank')">🏆 Mevcut Sıralama</button>
         </div>
     </div>
 
@@ -39,7 +38,7 @@
             <h3 id="pwTitle">Giriş</h3>
             <input type="password" id="pwIn" placeholder="Şifre">
             <button class="btn" onclick="checkPw()">Giriş Yap</button>
-            <button class="btn" style="background:none; color:#7d8590;" onclick="showPg('login')">Vazgeç</button>
+            <button class="btn" style="background:none; color:#7d8590;" onclick="window.location.href=window.location.pathname">Vazgeç</button>
         </div>
     </div>
 
@@ -55,12 +54,10 @@
         <div class="card">
             <h3 id="scanTitle">Kayıt</h3>
             <input type="text" id="bcIn" placeholder="Barkod Numarasını Yazın">
-            
-            <p style="font-size: 13px; color: #7d8590; margin-top: 10px;">Kanıt için fotoğraf çekin:</p>
+            <p style="font-size: 13px; color: #7d8590; margin-top: 10px;">Kanıt fotoğrafı çekin:</p>
             <input type="file" id="fileIn" accept="image/*" capture="environment" style="display:none;" onchange="handleFile(this)">
             <button class="btn" style="background:#21262d;" onclick="document.getElementById('fileIn').click()">📸 FOTOĞRAF ÇEK / SEÇ</button>
             <img id="preview" class="img-preview">
-
             <button class="btn" id="sendBtn" onclick="sendToAdmin()" style="margin-top:20px;" disabled>ONAYA GÖNDER</button>
             <button class="btn" style="background:var(--red);" onclick="logoutAndClear()">İptal Et / Geri Dön</button>
         </div>
@@ -68,9 +65,9 @@
 
     <div id="pgAdmin" class="pg">
         <div class="card">
-            <h3>Bekleyen Onaylar</h3>
+            <h3>Yönetici Paneli</h3>
             <div id="adminList"></div>
-            <button class="btn" style="background:var(--red); margin-top:20px;" onclick="showPg('login')">Paneli Kapat</button>
+            <button class="btn" style="background:var(--red); margin-top:20px;" onclick="window.location.href=window.location.pathname">Güvenli Çıkış</button>
         </div>
     </div>
 
@@ -85,68 +82,68 @@
         const CLASSES = {
             '5-A': 'maya5A', '5-B': 'maya5B', 
             '6-A': 'maya6A', '6-B': 'maya6B', '6-C': 'maya6C', '6-D': 'maya6D',
-            '7-A': 'maya7A', '7-B': 'maya7B', 'ADMIN': 'mayaAdmin2026'
+            '7-A': 'maya7A', '7-B': 'maya7B'
         };
 
         let selected = "";
         let currentClass = "";
         let base64Image = "";
 
-        // Fotoğraf İşleme - Butonu Kesin Aktifleştirir
+        // GİZLİ LİNK KONTROLÜ (Kritik Bölüm)
+        window.onload = function() {
+            build();
+            // Eğer URL'de ?yönetici yazıyorsa admin şifre ekranını aç
+            if (window.location.search.includes('yönetici')) {
+                selected = 'ADMIN';
+                showPg('pw');
+                document.getElementById('pwTitle').innerText = "Yönetici Girişi";
+            }
+        };
+
         function handleFile(input) {
             const file = input.files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onloadstart = function() {
-                document.getElementById('sendBtn').innerText = "Yükleniyor...";
-            };
+            document.getElementById('sendBtn').innerText = "Yükleniyor...";
             reader.onloadend = function() {
                 base64Image = reader.result;
-                const img = document.getElementById('preview');
-                img.src = base64Image;
-                img.style.display = "block";
-                const sendBtn = document.getElementById('sendBtn');
-                sendBtn.disabled = false; // BUTONU AKTİF ET
-                sendBtn.innerText = "ONAYA GÖNDER";
+                document.getElementById('preview').src = base64Image;
+                document.getElementById('preview').style.display = "block";
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('sendBtn').innerText = "ONAYA GÖNDER";
             }
             reader.readAsDataURL(file);
         }
 
-        // Formu ve Hafızayı Sıfırlama Fonksiyonu
         function logoutAndClear() {
             document.getElementById('bcIn').value = "";
             document.getElementById('preview').style.display = "none";
-            document.getElementById('preview').src = "";
-            document.getElementById('fileIn').value = "";
             base64Image = "";
             document.getElementById('sendBtn').disabled = true;
             showPg('login');
         }
 
-        // Sıralama
         db.ref('scores').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('rankList');
-            let arr = Object.keys(CLASSES).filter(c => c !== 'ADMIN').map(c => ({name: c, score: Number(data[c] || 0)}));
+            let arr = Object.keys(CLASSES).map(c => ({name: c, score: Number(data[c] || 0)}));
             arr.sort((a,b) => b.score - a.score);
-            list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name} Şubesi</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
+            list.innerHTML = arr.map((x, i) => `<div class="rank-item"><span><b>#${i+1}</b> ${x.name}</span><span style="color:var(--green); font-weight:bold;">${x.score} Puan</span></div>`).join('');
         });
 
-        // Admin Listesi
         db.ref('approvals').on('value', (s) => {
             const data = s.val() || {};
             const list = document.getElementById('adminList');
             const entries = Object.entries(data);
             if(entries.length === 0) { list.innerHTML = "<p>Bekleyen kayıt yok.</p>"; return; }
-            
             list.innerHTML = entries.map(([id, item]) => `
                 <div class="admin-card">
                     <p><b>Sınıf:</b> ${item.cls} | <b>BC:</b> ${item.bc}</p>
-                    <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ FOTOĞRAFI GÖR</button>
+                    <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ GÖR</button>
                     <img id="img-${id}" src="${item.img}" class="admin-img" onclick="window.open(this.src)">
                     <div style="display:flex; gap:10px;">
-                        <button class="btn" onclick="approve('${id}', '${item.cls}')">✅ KABUL ET</button>
-                        <button class="btn" style="background:var(--red);" onclick="reject('${id}')">❌ REDDET</button>
+                        <button class="btn" onclick="approve('${id}', '${item.cls}')">✅ OK</button>
+                        <button class="btn" style="background:var(--red);" onclick="reject('${id}')">❌ RED</button>
                     </div>
                 </div>`).join('');
         });
@@ -158,37 +155,30 @@
 
         function checkPw() {
             const val = document.getElementById('pwIn').value;
-            if(val === CLASSES[selected]) {
-                if(selected === 'ADMIN') showPg('admin');
-                else { 
-                    currentClass = selected; 
-                    // SINIF GİRİŞİNDE FORMU TEMİZLE (Kritik Düzeltme)
-                    document.getElementById('bcIn').value = "";
-                    document.getElementById('preview').style.display = "none";
-                    base64Image = "";
-                    document.getElementById('sendBtn').disabled = true;
-                    showPg('scan'); 
-                    document.getElementById('scanTitle').innerText = currentClass + " Kaydı"; 
-                }
-                document.getElementById('pwIn').value = "";
-            } else { alert("Hatalı Şifre!"); }
+            if (selected === 'ADMIN') {
+                db.ref('admin_access/' + val).once('value').then((snapshot) => {
+                    if (snapshot.exists() && snapshot.val() === true) {
+                        showPg('admin');
+                        document.getElementById('pwIn').value = "";
+                    } else { alert("Hatalı!"); }
+                });
+            } else {
+                if(val === CLASSES[selected]) {
+                    currentClass = selected;
+                    logoutAndClear();
+                    showPg('scan');
+                    document.getElementById('scanTitle').innerText = currentClass + " Kaydı";
+                } else { alert("Hatalı!"); }
+            }
         }
 
         function sendToAdmin() {
             const bc = document.getElementById('bcIn').value.trim();
-            if (!bc) return alert("Hata: Barkod yazın!");
-            if (!base64Image) return alert("Hata: Fotoğraf çekin!");
-
+            if (!bc || !base64Image) return alert("Eksik bilgi!");
             document.getElementById('sendBtn').innerText = "Gönderiliyor...";
-            document.getElementById('sendBtn').disabled = true;
-
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
-                alert("Başarılı! Kayıt onaya gönderildi.");
+                alert("Onaya gönderildi!");
                 logoutAndClear();
-            }).catch(e => {
-                alert("Sistem hatası: " + e.message);
-                document.getElementById('sendBtn').disabled = false;
-                document.getElementById('sendBtn').innerText = "ONAYA GÖNDER";
             });
         }
 
@@ -197,25 +187,20 @@
         }
 
         function reject(id) {
-            if(confirm("Bu kaydı reddetmek istediğinize emin misiniz?")) {
-                db.ref('approvals/' + id).remove();
-            }
+            if(confirm("Silinsin mi?")) db.ref('approvals/' + id).remove();
         }
 
         function build() {
             const g = document.getElementById('classGrid');
+            g.innerHTML = "";
             Object.keys(CLASSES).forEach(c => {
-                if(c === 'ADMIN') return;
                 const b = document.createElement('button');
                 b.className = 'btn'; b.style.background = "#21262d";
-                b.innerText = c; b.onclick = () => openLogin(c);
+                b.innerText = c; b.onclick = () => { selected = c; showPg('pw'); document.getElementById('pwTitle').innerText = c + " Girişi"; };
                 g.appendChild(b);
             });
         }
-        function openLogin(c) { selected = c; showPg('pw'); document.getElementById('pwTitle').innerText = c + " Girişi"; }
         function showPg(id) { document.querySelectorAll('.pg').forEach(p => p.classList.remove('on')); document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on'); }
-
-        build();
     </script>
 </body>
 </html>
