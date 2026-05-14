@@ -19,12 +19,17 @@
         .img-preview { width:100%; border-radius:8px; margin-top:10px; display:none; border: 2px solid var(--green); }
         .admin-img { width:100%; border-radius:8px; margin-top:10px; cursor: pointer; display:none; border: 1px solid var(--border); }
         .admin-card { padding:15px; border:1px solid var(--border); border-radius:8px; margin-bottom:10px; background:#0d1117; text-align:left; }
+        #lockBox { display:none; background:var(--red); color:white; padding:30px; border-radius:12px; margin:20px auto; max-width:500px; font-weight:bold; font-size:1.2em; }
     </style>
 </head>
 <body>
 
     <h2 style="color:var(--green);">♻️ Maya GeriKazanım</h2>
 
+    <!-- KİLİT EKRANI (Tüm cihazlarda anlık görünür) -->
+    <div id="lockBox">🔒 Yarışma Sona Erdi.<br>Katılan tüm sınıflara teşekkür ederiz!</div>
+
+    <!-- ANA SAYFA -->
     <div id="pgLogin" class="pg on">
         <div class="card">
             <h3>Sınıfını Seç</h3>
@@ -33,6 +38,7 @@
         </div>
     </div>
 
+    <!-- ŞİFRE EKRANI -->
     <div id="pgPw" class="pg">
         <div class="card">
             <h3 id="pwTitle">Giriş</h3>
@@ -42,6 +48,7 @@
         </div>
     </div>
 
+    <!-- SIRALAMA -->
     <div id="pgRank" class="pg">
         <div class="card">
             <h3>🏆 Liderlik Tablosu</h3>
@@ -50,6 +57,7 @@
         </div>
     </div>
 
+    <!-- KAYIT EKRANI -->
     <div id="pgScan" class="pg">
         <div class="card">
             <h3 id="scanTitle">Kayıt</h3>
@@ -62,15 +70,21 @@
         </div>
     </div>
 
+    <!-- ADMIN PANELİ -->
     <div id="pgAdmin" class="pg">
         <div class="card">
             <h3>Yönetici Paneli</h3>
+            <div id="lockControl" style="margin-bottom:20px; padding:15px; border:2px dashed var(--border); border-radius:10px;">
+                <p>Pazar Gecesi İçin Sistem Kilidi:</p>
+                <button id="lockToggleBtn" class="btn" onclick="toggleSystemLock()">YÜKLENİYOR...</button>
+            </div>
             <div id="adminList"></div>
             <button class="btn" style="background:var(--red); margin-top:20px;" onclick="window.location.href=window.location.origin + window.location.pathname">Güvenli Çıkış</button>
         </div>
     </div>
 
     <script>
+        // Firebase Yapılandırması
         const config = {
             apiKey: "AIzaSyBmkMyRIBgih2b4nHqA0sVOz7j0m54shbc",
             databaseURL: "https://gerikazanim-90377-default-rtdb.europe-west1.firebasedatabase.app"
@@ -78,17 +92,42 @@
         firebase.initializeApp(config);
         const db = firebase.database();
 
-        // Güncellenmiş Şifreler
+        // Şifreler (Base64 formatında gizlenmiştir)
         const SECRETS = {
             '5-A': 'bWF5YTVB', '5-B': 'bWF5YTVC', 
             '6-A': 'bWF5YTZB', '6-B': 'bWF5YTZC', '6-C': 'bWF5YTZD', '6-D': 'bWF5YTZE',
             '7-A': 'bWF5YTdB', '7-B': 'bWF5YTdC',
-            'ADMIN': 'bWF5YW1heWE=' // "mayamaya" şifresinin gizli hali
+            'ADMIN': 'bWF5YW1heWE=' // mayamaya
         };
 
+        let isLocked = false;
         let selected = "";
         let currentClass = "";
         let base64Image = "";
+
+        // SİSTEM KİLİDİNİ TÜM CİHAZLARDA ANLIK TAKİP ET
+        db.ref('system_status/locked').on('value', (s) => {
+            isLocked = s.val() || false;
+            const lockBox = document.getElementById('lockBox');
+            const loginPage = document.getElementById('pgLogin');
+            const toggleBtn = document.getElementById('lockToggleBtn');
+
+            if (isLocked) {
+                lockBox.style.display = "block";
+                loginPage.style.display = "none";
+                if(toggleBtn) {
+                    toggleBtn.innerText = "SİSTEMİ AÇ (Yarışma Devam Ediyor)";
+                    toggleBtn.style.background = "var(--green)";
+                }
+            } else {
+                lockBox.style.display = "none";
+                loginPage.style.display = "block";
+                if(toggleBtn) {
+                    toggleBtn.innerText = "SİSTEMİ KİLİTLE (Yarışma Bitti)";
+                    toggleBtn.style.background = "var(--red)";
+                }
+            }
+        });
 
         window.onload = function() {
             build();
@@ -100,12 +139,26 @@
             }
         };
 
+        function toggleSystemLock() {
+            const newState = !isLocked;
+            const msg = newState ? "Sistemi kilitlemek ve yarışmayı bitirmek istiyor musunuz?" : "Sistemi tekrar açmak istiyor musunuz?";
+            if (confirm(msg)) {
+                const pass = prompt("Onay için yönetici şifresini girin:");
+                if (btoa(pass) === SECRETS['ADMIN']) {
+                    db.ref('system_status').set({ locked: newState });
+                } else {
+                    alert("Hatalı şifre! Yetkisiz işlem.");
+                }
+            }
+        }
+
         function checkPw() {
             const val = document.getElementById('pwIn').value.trim();
             if (btoa(val) === SECRETS[selected]) {
                 if (selected === 'ADMIN') {
                     showPg('admin');
                 } else {
+                    if (isLocked) { alert("Yarışma sona erdiği için giriş yapılamaz!"); return; }
                     currentClass = selected;
                     logoutAndClear();
                     showPg('scan');
@@ -153,15 +206,15 @@
             const data = s.val() || {};
             const list = document.getElementById('adminList');
             const entries = Object.entries(data);
-            if(entries.length === 0) { list.innerHTML = "<p>Bekleyen kayıt yok.</p>"; return; }
+            if(entries.length === 0) { list.innerHTML = "<p style='text-align:center;'>Bekleyen kayıt yok.</p>"; return; }
             list.innerHTML = entries.map(([id, item]) => `
                 <div class="admin-card">
-                    <p><b>Sınıf:</b> ${item.cls} | <b>BC:</b> ${item.bc}</p>
-                    <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ GÖR</button>
+                    <p><b>Sınıf:</b> ${item.cls} | <b>Barkod:</b> ${item.bc}</p>
+                    <button class="btn" style="background:#21262d; font-size:12px;" onclick="toggleImg('${id}')">🖼️ FOTOĞRAFI GÖR</button>
                     <img id="img-${id}" src="${item.img}" class="admin-img" onclick="window.open(this.src)">
                     <div style="display:flex; gap:10px;">
-                        <button class="btn" onclick="approve('${id}', '${item.cls}')">✅ OK</button>
-                        <button class="btn" style="background:var(--red);" onclick="reject('${id}')">❌ RED</button>
+                        <button class="btn" onclick="approve('${id}', '${item.cls}')">✅ ONAYLA</button>
+                        <button class="btn" style="background:var(--red);" onclick="reject('${id}')">❌ REDDET</button>
                     </div>
                 </div>`).join('');
         });
@@ -172,10 +225,11 @@
         }
 
         function sendToAdmin() {
+            if (isLocked) { alert("Yarışma sona erdi!"); return; }
             const bc = document.getElementById('bcIn').value.trim();
-            if (!bc || !base64Image) return alert("Eksik bilgi!");
+            if (!bc || !base64Image) return alert("Lütfen barkod girin ve fotoğraf çekin!");
             db.ref('approvals').push({ cls: currentClass, bc: bc, img: base64Image }).then(() => {
-                alert("Onaya gönderildi!");
+                alert("Kayıt onaya gönderildi!");
                 logoutAndClear();
             });
         }
@@ -185,7 +239,7 @@
         }
 
         function reject(id) {
-            if(confirm("Silinsin mi?")) db.ref('approvals/' + id).remove();
+            if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) db.ref('approvals/' + id).remove();
         }
 
         function build() {
@@ -199,7 +253,11 @@
                 g.appendChild(b);
             });
         }
-        function showPg(id) { document.querySelectorAll('.pg').forEach(p => p.classList.remove('on')); document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on'); }
+
+        function showPg(id) { 
+            document.querySelectorAll('.pg').forEach(p => p.classList.remove('on')); 
+            document.getElementById('pg' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('on'); 
+        }
     </script>
 </body>
 </html>
